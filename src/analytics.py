@@ -50,9 +50,12 @@ def is_clickhouse_available():
         if not CLICKHOUSE_URL:
             print("CLICKHOUSE_URL not set, analytics will be disabled")
             return False
+        host = os.getenv("CLICKHOUSE_HOST", "localhost")
+        port = int(os.getenv("CLICKHOUSE_PORT", 8123))
+        
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             sock.settimeout(1.0)  # 1 second timeout
-            result = sock.connect_ex(('localhost', 8123))
+            result = sock.connect_ex((host, port))
             return result == 0
     except:
         return False
