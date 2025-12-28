@@ -11,9 +11,8 @@ WORKDIR /app
 COPY pyproject.toml .
 COPY uv.lock .
 
-# Cache mount for better performance
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+# Install dependencies
+RUN uv sync --frozen --no-dev
 
 # Runtime stage
 FROM python:3.12-slim-trixie
@@ -39,9 +38,7 @@ COPY main.py .
 # Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')" || exit 1
+
 
 # Run application
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
