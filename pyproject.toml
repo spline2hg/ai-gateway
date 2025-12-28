@@ -10,6 +10,7 @@ dependencies = [
     "clickhouse-sqlalchemy>=0.3.2",
     "fastapi>=0.121.3",
     "openai>=2.8.1",
+    "psycopg2-binary>=2.9.11",
     "python-dotenv>=1.2.1",
     "ruff>=0.14.6",
     "sqlalchemy>=2.0.44",
