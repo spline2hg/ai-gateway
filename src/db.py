@@ -3,6 +3,10 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.sql import func
 from sqlalchemy import DateTime
 from sqlalchemy.pool import StaticPool
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 Base = declarative_base()
 
@@ -29,7 +33,24 @@ class Gateway(Base):
     user = relationship("User", back_populates="gateways")
     
 
-engine = create_engine("sqlite:///./gateway1.db", connect_args={"check_same_thread": False},poolclass=StaticPool,)
+# Determine if we're in production
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+
+# Create engine based on environment
+if ENVIRONMENT == "production":
+    # Use PostgreSQL in production
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is required in production")
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+else:
+    # Use SQLite in development
+    engine = create_engine(
+        "sqlite:///./gateway1.db",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
 SessionLocal = sessionmaker(bind=engine)
 
 def get_db():
