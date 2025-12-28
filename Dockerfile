@@ -33,7 +33,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 # Copy application code
 COPY src ./src
-COPY main.py .
 
 # Expose port
 EXPOSE 8000
