@@ -1,6 +1,7 @@
 import json
 import time
 import sys
+import os
 from pathlib import Path
 import uuid
 from starlette.responses import StreamingResponse
@@ -21,11 +22,14 @@ from typing import Dict, List, Optional
 
 app = FastAPI(title="OpenAI-compatible API")
 
+# Get CORS origins from environment or use default for local development
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+cors_origins = [origin.strip() for origin in cors_origins]
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
