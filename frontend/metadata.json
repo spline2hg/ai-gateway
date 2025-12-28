@@ -1,0 +1,5 @@
+{
+  "name": "AI Gateway",
+  "description": "A comprehensive AI Gateway dashboard to observe, control, and analyze AI application traffic with integrated playground and logging.",
+  "requestFramePermissions": []
+}
