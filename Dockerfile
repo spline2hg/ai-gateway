@@ -1,5 +1,5 @@
 # Build stage - install dependencies
-FROM python:3.12-slim-trixie as builder
+FROM python:3.12-slim-trixie AS builder
 
 # Copy uv from official distroless image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -38,7 +38,5 @@ COPY main.py .
 # Expose port
 EXPOSE 8000
 
-
-
 # Run application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

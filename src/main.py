@@ -5,11 +5,10 @@ from pathlib import Path
 import uuid
 from starlette.responses import StreamingResponse
 
-from db import Base, engine, get_db, Gateway, User
-
 # Add the src directory to the path for imports
-sys.path.append(str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent))
 
+from db import Base, engine, get_db, Gateway, User
 from models import ChatCompletionRequest, GatewayCreate
 from utils import resolve_route, validate_gateway, extract_status_code_from_error, get_cost, make_cache_key, analytics_cache, generate_username, get_current_user
 from analytics import save_analytics, Analytics_Base, analytics_engine, _Session, RequestAnalytics
