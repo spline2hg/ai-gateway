@@ -74,7 +74,10 @@ async def chat_completions(
     print(x_gateway_authorization, x_gateway_id)
     # mapped_llm_url = "https://portal.qwen.ai/v1/"
     
-    model_name, provider, mapped_llm_url, api_key = resolve_route(request.model)
+    model_name, provider, mapped_llm_url, resolved_api_key = resolve_route(request.model)
+    # Use resolved API key if provided, otherwise keep the one from Authorization header
+    if resolved_api_key is not None:
+        api_key = resolved_api_key
     
     client = AsyncOpenAI(api_key=api_key, base_url=mapped_llm_url)
 
