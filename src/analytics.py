@@ -10,7 +10,7 @@ import logging
 Analytics_Base = get_declarative_base()
 
 class RequestAnalytics(Analytics_Base):
-    __tablename__ = "request_analytics4"
+    __tablename__ = "request_analytics"
     __table_args__ = (
         engines.MergeTree(order_by=['timestamp']),
     )
@@ -50,13 +50,13 @@ def is_clickhouse_available():
         if not CLICKHOUSE_URL:
             print("CLICKHOUSE_URL not set, analytics will be disabled")
             return False
-        host = os.getenv("CLICKHOUSE_HOST", "localhost")
-        port = int(os.getenv("CLICKHOUSE_PORT", 8123))
-        
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            sock.settimeout(1.0)  # 1 second timeout
-            result = sock.connect_ex((host, port))
-            return result == 0
+        # host = os.getenv("CLICKHOUSE_HOST", "localhost")
+        # port = int(os.getenv("CLICKHOUSE_PORT", 8123))
+        return True
+        # with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        #     sock.settimeout(1.0)  # 1 second timeout
+        #     result = sock.connect_ex((host, port))
+        #     return result == 0
     except:
         return False
 
@@ -65,7 +65,12 @@ if is_clickhouse_available():
         analytics_engine = create_engine(
             CLICKHOUSE_URL,
             pool_pre_ping=True,
-            connect_args={"connect_timeout": 1, "send_receive_timeout": 2},
+            # secure=True
+            # connect_args={
+            #     'protocol': 'https',
+            #     'verify': True  # Recommended for Aiven's trusted certs
+            # }
+            # connect_args={"connect_timeout": 1, "send_receive_timeout": 2},
         )
         _Session = sessionmaker(bind=analytics_engine)
     except Exception as e:
@@ -73,7 +78,7 @@ if is_clickhouse_available():
         analytics_engine = None
         _Session = None
 else:
-    print("ClickHouse server not available at localhost:8123")
+    print(f"ClickHouse server not available at {CLICKHOUSE_URL}")
     analytics_engine = None
     _Session = None
 
