@@ -3,6 +3,7 @@ import { Gateway, LogEntry } from './types';
 import Dashboard from './components/Dashboard';
 import GatewayView from './components/GatewayView';
 import Profile from './components/Profile';
+import LandingPage from './pages/LandingPage';
 import { analyticsApi } from './services/apiService';
 import { Command, ChevronRight, Book, Loader2, Copy, Check, Sun, Moon } from 'lucide-react';
 import { useTheme } from './context/ThemeContext';
@@ -26,7 +27,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   // Simple State-based Router
-  const [view, setView] = useState<'dashboard' | 'gateway' | 'profile'>('dashboard');
+  const [view, setView] = useState<'landing' | 'dashboard' | 'gateway' | 'profile'>('landing');
   const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
 
   // State for storing newly created gateway credentials
@@ -100,6 +101,17 @@ function App() {
   const handleBackToDashboard = () => {
     setView('dashboard');
     setSelectedGatewayId(null);
+  };
+
+  const handleEnterDashboard = () => {
+    setView('dashboard');
+  };
+
+  const handleGoToProfile = () => {
+    // First enter dashboard (which handles auth), then go to profile
+    setView('dashboard');
+    // Schedule profile view after a tick to ensure auth is ready
+    setTimeout(() => setView('profile'), 0);
   };
 
   const handleCreateGateway = async (name: string) => {
@@ -186,6 +198,11 @@ function App() {
 
   const selectedGateway = gateways.find(gw => gw.id === selectedGatewayId);
 
+  // Show landing page if on landing view
+  if (view === 'landing') {
+    return <LandingPage onEnter={handleEnterDashboard} onProfile={handleGoToProfile} />;
+  }
+
   // Show loading state while checking authentication or fetching gateways
   if (authLoading || loading) {
     return (
@@ -263,13 +280,21 @@ function App() {
                  )}
                </button>
                {user && (
-                 <button
-                   onClick={() => setView('profile')}
-                   className="w-7 h-7 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs font-medium text-gray-900 dark:text-white shadow-inner hover:scale-105 transition-transform cursor-pointer"
-                   title={user.username}
-                 >
-                   {user.username.charAt(0).toUpperCase()}
-                 </button>
+                 <div className="flex items-center gap-3">
+                   <button
+                     onClick={() => setView('profile')}
+                     className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                   >
+                     Profile
+                   </button>
+                   <button
+                     onClick={() => setView('profile')}
+                     className="w-7 h-7 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs font-medium text-gray-900 dark:text-white shadow-inner hover:scale-105 transition-transform cursor-pointer"
+                     title={user.username}
+                   >
+                     {user.username.charAt(0).toUpperCase()}
+                   </button>
+                 </div>
                )}
            </div>
        </nav>
