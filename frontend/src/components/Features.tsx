@@ -38,18 +38,13 @@ const Features: React.FC = () => {
   return (
     <section id="features" className="relative py-24 px-6 bg-black border-t border-white/5">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div>
-                <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-4">
-                    Powerful Features for AI Integration
-                </h2>
-                <p className="text-white/50 max-w-lg text-lg">
-                    Everything you need to manage LLM costs, monitor performance, and route requests efficiently.
-                </p>
-            </div>
-            <button className="text-sm font-medium text-white border-b border-white/30 pb-1 hover:border-white transition-colors">
-                Explore all features
-            </button>
+        <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-white mb-4">
+                Powerful Features for AI Integration
+            </h2>
+            <p className="text-white/50 max-w-lg text-lg">
+                Everything you need to manage LLM costs, monitor performance, and route requests efficiently.
+            </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

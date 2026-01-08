@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Zap } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   onEnter?: () => void;
@@ -22,10 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ onEnter, onProfile }) => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-4' : 'bg-transparent py-6'}`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         <div className="flex items-center gap-2 group cursor-pointer">
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors">
-            <div className="absolute inset-0 bg-white/10 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Zap size={18} className="text-white relative z-10" />
-          </div>
+          <img src="/logo.png" alt="Raven" className="h-8 w-8" />
           <span className="font-semibold text-lg tracking-tight">Raven</span>
         </div>
 
