@@ -5,20 +5,21 @@ import GatewayView from './components/GatewayView';
 import Profile from './components/Profile';
 import LandingPage from './pages/LandingPage';
 import { analyticsApi } from './services/apiService';
-import { Command, ChevronRight, Book, Loader2, Copy, Check, Sun, Moon } from 'lucide-react';
+import { Command, ChevronRight, Book, Loader2, Copy, Check, Sun, Moon, Activity, Zap, BarChart3 } from 'lucide-react';
 import { useTheme } from './context/ThemeContext';
 import { useAuth } from './context/AuthContext';
 
+const LOADING_FACTS = [
+  { icon: Activity, text: 'LLM observability tracks token usage, latency, and cost per request' },
+  { icon: BarChart3, text: 'Streaming responses reduce time-to-first-token by up to 80%' },
+  { icon: Activity, text: 'Prompt caching can reduce costs by 50-90% for repeated queries' },
+  { icon: Zap, text: 'The average LLM API call takes 1-3 seconds end-to-end' },
+  { icon: BarChart3, text: 'Token-level billing means every character in your prompt has a cost' },
+];
+
 function App() {
   const { theme, toggleTheme } = useTheme();
-  const { user, loading: authLoading, join } = useAuth();
-
-  // Auto-join on first visit if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      join().catch(err => console.error('Auto-join failed:', err));
-    }
-  }, [authLoading, user, join]);
+  const { user, loading: authLoading, backendReady, join } = useAuth();
 
   // Application State - NO INITIAL SAMPLE DATA
   const [gateways, setGateways] = useState<Gateway[]>([]);
@@ -203,6 +204,30 @@ function App() {
     return <LandingPage onEnter={handleEnterDashboard} onProfile={handleGoToProfile} />;
   }
 
+  // Show backend starting screen
+  if (!backendReady) {
+    const factIndex = Math.floor(Date.now() / 5000) % LOADING_FACTS.length;
+    const fact = LOADING_FACTS[factIndex];
+    const FactIcon = fact.icon;
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
+          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+            <Loader2 size={24} className="text-gray-400 dark:text-gray-600 animate-spin" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Connecting to backend</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Starting up AI Gateway services...</p>
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 w-full">
+            <FactIcon size={18} className="text-gray-400 dark:text-gray-500 shrink-0" />
+            <span className="text-xs text-gray-600 dark:text-gray-400 text-left">{fact.text}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show loading state while checking authentication or fetching gateways
   if (authLoading || loading) {
     return (
@@ -221,11 +246,17 @@ function App() {
   if (error) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
-        <div className="bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800/30 rounded-lg p-6 text-center max-w-md">
-          <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
+        <div className="flex flex-col items-center gap-4 max-w-sm text-center">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <span className="text-red-500 dark:text-red-400 text-lg">!</span>
+          </div>
+          <div>
+            <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Something went wrong</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{error}</p>
+          </div>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 dark:bg-red-800 text-white rounded text-sm hover:bg-red-700 dark:hover:bg-red-700 transition-colors"
+            className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
           >
             Retry
           </button>

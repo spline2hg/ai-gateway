@@ -100,10 +100,8 @@ const Profile = () => {
           <div className="space-y-3">
             <button
               onClick={() => {
-                if (confirm('Are you sure you want to logout? This will clear your local identity.')) {
-                  logout();
-                  window.location.reload();
-                }
+                logout();
+                window.location.reload();
               }}
               className="w-full px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 text-red-700 dark:text-red-400 rounded-md text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
             >

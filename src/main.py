@@ -48,7 +48,11 @@ async def startup():
         print("ClickHouse not available, analytics will be disabled")
 
     Base.metadata.create_all(engine)
-    
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 @app.post("/chat/completions")
 async def chat_completions(
     request: ChatCompletionRequest, authorization: str = Header(None),
