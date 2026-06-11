@@ -7,15 +7,14 @@ import BackgroundBeams from '../components/BackgroundBeams';
 
 interface LandingPageProps {
   onEnter?: () => void;
-  onProfile?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onProfile }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
   return (
     <div className="relative min-h-screen w-full bg-[#030303] text-white selection:bg-white/20 selection:text-white overflow-hidden">
       <BackgroundBeams />
       <div className="relative z-10">
-        <Navbar onEnter={onEnter} onProfile={onProfile} />
+        <Navbar />
         <main>
           <Hero onEnter={onEnter} />
           <Features />

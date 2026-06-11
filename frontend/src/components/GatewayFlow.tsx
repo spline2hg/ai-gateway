@@ -177,7 +177,7 @@ const GatewayFlow: React.FC = () => {
             <Zap className={`w-8 h-8 md:w-10 md:h-10 transition-colors duration-200 ${phase === 2 ? 'text-white fill-white' : 'text-white/40'}`} />
           </div>
           <span className={`text-xs font-bold tracking-widest px-3 py-1.5 rounded-full border backdrop-blur-md transition-colors duration-300 ${phase === 2 ? 'bg-white text-black border-white' : 'bg-black/80 text-white border-white/20'}`}>
-            RAVEN
+            AI Gateway
           </span>
         </div>
 

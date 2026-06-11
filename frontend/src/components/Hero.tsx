@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import GatewayFlow from './GatewayFlow';
 
 interface HeroProps {
@@ -12,17 +12,8 @@ const Hero: React.FC<HeroProps> = ({ onEnter }) => {
       
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
         
-        {/* Announcement Pill */}
-        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            <a href="#features" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all text-xs font-medium text-white/70 hover:text-white backdrop-blur-md group">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span>300+ LLM Models Supported</span>
-                <ChevronRight size={12} className="text-white/40 group-hover:text-white transition-colors" />
-            </a>
-        </div>
-
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40 max-w-5xl mx-auto leading-[0.9] animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter mb-8 max-w-5xl mx-auto leading-[0.9] animate-fade-in-up text-white" style={{ animationDelay: '0.2s' }}>
           API Gateway <br /> for LLMs
         </h1>
 

@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
-interface NavbarProps {
-  onEnter?: () => void;
-  onProfile?: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onEnter, onProfile }) => {
+const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { theme } = useTheme();
+
+  const isLanding = location.pathname === '/';
+  const isDark = theme === 'dark' || isLanding;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,33 +21,95 @@ const Navbar: React.FC<NavbarProps> = ({ onEnter, onProfile }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const getNavLinks = () => {
+    if (location.pathname === '/dashboard') {
+      return [{ label: 'Profile', path: '/profile' }];
+    }
+    if (location.pathname === '/profile') {
+      return [{ label: 'Dashboard', path: '/dashboard' }];
+    }
+    if (location.pathname.startsWith('/gateway/')) {
+      return [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Profile', path: '/profile' },
+      ];
+    }
+    return [
+      { label: 'Dashboard', path: '/dashboard' },
+      { label: 'Profile', path: '/profile' },
+    ];
+  };
+
+  const navLinks = getNavLinks();
+
+  const brandTextClass = isDark ? 'text-white' : 'text-gray-900';
+  const linkClass = isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900';
+  const mobileBgClass = isDark ? 'bg-black/95 border-white/10' : 'bg-white/95 border-gray-200';
+  const mobileBtnClass = isDark
+    ? 'text-white/70 hover:text-white'
+    : 'text-gray-500 hover:text-gray-900';
+  const mobileLinkClass = isDark
+    ? 'text-white/70 hover:text-white'
+    : 'text-gray-600 hover:text-gray-900';
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-4' : 'bg-transparent py-6'}`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <img src="/logo.png" alt="Raven" className="h-8 w-8" />
-          <span className="font-semibold text-lg tracking-tight">Raven</span>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isLanding
+          ? scrolled
+            ? 'glass-nav py-4'
+            : 'bg-transparent py-6'
+          : 'h-14 glass-panel'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-full">
+        <div
+          className="flex items-center gap-2 cursor-pointer group"
+          onClick={() => navigate('/')}
+        >
+          <span className={`font-semibold text-lg tracking-tight ${brandTextClass}`}>
+            AI Gateway
+          </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
-          <button onClick={onProfile} className="relative inline-flex h-9 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-            <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-black px-4 py-1 text-sm font-medium text-white backdrop-blur-3xl transition-colors hover:bg-zinc-900">
-              Profile
-            </span>
-          </button>
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <button
+              key={link.path}
+              onClick={() => navigate(link.path)}
+              className={`text-sm font-medium transition-colors ${linkClass}`}
+            >
+              {link.label}
+            </button>
+          ))}
         </div>
 
         <div className="md:hidden">
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white/70 hover:text-white">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={mobileBtnClass}
+          >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {mobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-xl border-b border-white/10 p-6 md:hidden flex flex-col gap-4">
-          <button onClick={onProfile} className="bg-white text-black text-center py-2 rounded-md font-medium">Profile</button>
+        <div
+          className={`absolute top-full left-0 right-0 backdrop-blur-xl border-b p-6 md:hidden flex flex-col gap-4 ${mobileBgClass}`}
+        >
+          {navLinks.map((link) => (
+            <button
+              key={link.path}
+              onClick={() => {
+                navigate(link.path);
+                setMobileMenuOpen(false);
+              }}
+              className={`text-center py-2 rounded-md font-medium ${mobileLinkClass}`}
+            >
+              {link.label}
+            </button>
+          ))}
         </div>
       )}
     </nav>
