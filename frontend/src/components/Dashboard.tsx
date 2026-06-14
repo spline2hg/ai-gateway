@@ -40,8 +40,8 @@ const Dashboard: React.FC<DashboardProps> = ({ gateways, onSelectGateway, onCrea
           <p className="text-gray-600 dark:text-gray-400">Manage and monitor your AI application gateways.</p>
         </div>
         <div className="text-right hidden sm:block">
-           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Balance</div>
-           <div className="text-2xl font-mono text-gray-900 dark:text-white">$15.00</div>
+           <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Cost</div>
+           <div className="text-2xl font-mono text-gray-900 dark:text-white">{formatCurrency(gateways.reduce((acc, g) => acc + g.cost, 0))}</div>
         </div>
       </div>
 
@@ -55,7 +55,6 @@ const Dashboard: React.FC<DashboardProps> = ({ gateways, onSelectGateway, onCrea
             <div className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                 {formatNumber(gateways.reduce((acc, g) => acc + g.requestCount, 0))}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">+12% from last month</div>
          </div>
          
          <div className="p-5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">

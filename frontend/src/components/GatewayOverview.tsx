@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Gateway, LogEntry } from '../types';
 import { formatNumber, formatCurrency } from '../utils';
 import { analyticsApi } from '../services/apiService';
+import { BACKEND_URL } from '../services/config';
 import { Activity, Server, Copy, Check, Lock, ShieldAlert, Loader2 } from 'lucide-react';
 
 interface Props {
@@ -57,7 +58,7 @@ const GatewayOverview: React.FC<Props> = ({ gateway, logs }) => {
 <span class="text-gray-500"># Configure with your AI Gateway URL and authentication</span>
 client = OpenAI(
     api_key=<span class="text-green-400">"your-provider-api-key"</span>,
-    base_url=<span class="text-green-400">"http://localhost:8000/v1"</span>,
+    base_url=<span class="text-green-400">"${BACKEND_URL}/v1"</span>,
     default_headers={
         <span class="text-green-400">"X-Gateway-Authorization"</span>: <span class="text-green-400">"YOUR_GATEWAY_SECRET"</span>,
         <span class="text-green-400">"X-Gateway-ID"</span>: <span class="text-green-400">"YOUR_GATEWAY_ID"</span>,
@@ -72,7 +73,7 @@ response = client.chat.completions.create(
     ]
 )
 print(response.choices[0].message.content)`,
-    curl: `curl -X POST <span class="text-green-400">"http://localhost:8000/v1/chat/completions"</span> \\
+    curl: `curl -X POST <span class="text-green-400">"${BACKEND_URL}/v1/chat/completions"</span> \\
   -H <span class="text-green-400">"Content-Type: application/json"</span> \\
   -H <span class="text-green-400">"Authorization: Bearer your-provider-api-key"</span> \\
   -H <span class="text-green-400">"X-Gateway-Authorization: YOUR_GATEWAY_SECRET"</span> \\
@@ -219,7 +220,7 @@ print(response.choices[0].message.content)`,
                     <span className="text-blue-600 dark:text-blue-400 text-sm">🔗</span>
                     <span className="text-xs text-gray-700 dark:text-gray-400">Gateway URL:</span>
                     <code className="text-xs text-blue-700 dark:text-blue-400 font-mono bg-white dark:bg-black px-2 py-0.5 rounded border border-blue-300 dark:border-blue-800/30">
-                      http://localhost:8000/v1
+                      {BACKEND_URL}/v1
                     </code>
                   </div>
                   <span className="text-xs text-gray-600 dark:text-gray-500">Get credentials in Settings</span>

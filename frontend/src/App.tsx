@@ -18,6 +18,88 @@ const LOADING_FACTS = [
   { icon: BarChart3, text: 'Token-level billing means every character in your prompt has a cost' },
 ];
 
+function ProtectedRoute({ children, loading, error }: { children: React.ReactNode; loading: boolean; error: string | null }) {
+  const { backendReady, loading: authLoading } = useAuth();
+
+  if (!backendReady) {
+    const factIndex = Math.floor(Date.now() / 5000) % LOADING_FACTS.length;
+    const fact = LOADING_FACTS[factIndex];
+    const FactIcon = fact.icon;
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
+          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+            <Loader2 size={24} className="text-gray-400 dark:text-gray-600 animate-spin" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Connecting to backend</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Starting up AI Gateway services...</p>
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 w-full">
+            <FactIcon size={18} className="text-gray-400 dark:text-gray-500 shrink-0" />
+            <span className="text-xs text-gray-600 dark:text-gray-400 text-left">{fact.text}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
+          <span className="text-gray-500 dark:text-gray-400 text-sm">Setting up your identity...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
+          <span className="text-gray-500 dark:text-gray-400 text-sm">Loading gateways...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 max-w-sm text-center">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <span className="text-red-500 dark:text-red-400 text-lg">!</span>
+          </div>
+          <div>
+            <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Something went wrong</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{error}</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans selection:bg-gray-200 dark:selection:bg-gray-800 selection:text-gray-900 dark:selection:text-white">
+      <Navbar />
+      <main className="pt-14">{children}</main>
+    </div>
+  );
+}
+
 function App() {
   const { user, loading: authLoading, backendReady } = useAuth();
   const navigate = useNavigate();
@@ -182,68 +264,55 @@ function App() {
 
   const selectedGateway = gateways.find(gw => gw.id === selectedGatewayId);
 
-  if (!backendReady) {
-    const factIndex = Math.floor(Date.now() / 5000) % LOADING_FACTS.length;
-    const fact = LOADING_FACTS[factIndex];
-    const FactIcon = fact.icon;
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
-          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-            <Loader2 size={24} className="text-gray-400 dark:text-gray-600 animate-spin" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Connecting to backend</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Starting up AI Gateway services...</p>
-          </div>
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 w-full">
-            <FactIcon size={18} className="text-gray-400 dark:text-gray-500 shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-gray-400 text-left">{fact.text}</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
-          <span className="text-gray-500 dark:text-gray-400 text-sm">
-            {authLoading ? 'Setting up your identity...' : 'Loading gateways...'}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4 max-w-sm text-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-            <span className="text-red-500 dark:text-red-400 text-lg">!</span>
-          </div>
-          <div>
-            <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Something went wrong</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{error}</p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const AppLayout = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans selection:bg-gray-200 dark:selection:bg-gray-800 selection:text-gray-900 dark:selection:text-white">
-      <Navbar />
-      <main className="pt-14">{children}</main>
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<LandingPage onEnter={handleEnterDashboard} />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute loading={loading} error={error}>
+              <AppLayout>
+                <Dashboard
+                  gateways={gateways}
+                  onSelectGateway={handleSelectGateway}
+                  onCreateGateway={handleCreateGateway}
+                />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gateway/:id"
+          element={
+            <ProtectedRoute loading={loading} error={error}>
+              <AppLayout>
+                {selectedGateway ? (
+                  <GatewayView
+                    gateway={selectedGateway}
+                    logs={[]}
+                    onBack={handleBackToDashboard}
+                    onNewLog={handleNewLog}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )}
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute loading={loading} error={error}>
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
       {showCredentialsModal && newGatewayCredentials && (
         <div className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -304,51 +373,7 @@ function App() {
           </div>
         </div>
       )}
-    </div>
-  );
-
-  return (
-    <Routes>
-      <Route path="/" element={<LandingPage onEnter={handleEnterDashboard} />} />
-      <Route
-        path="/dashboard"
-        element={
-          <AppLayout>
-            <Dashboard
-              gateways={gateways}
-              onSelectGateway={handleSelectGateway}
-              onCreateGateway={handleCreateGateway}
-            />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/gateway/:id"
-        element={
-          <AppLayout>
-            {selectedGateway ? (
-              <GatewayView
-                gateway={selectedGateway}
-                logs={[]}
-                onBack={handleBackToDashboard}
-                onNewLog={handleNewLog}
-              />
-            ) : (
-              <Navigate to="/dashboard" replace />
-            )}
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <AppLayout>
-            <Profile />
-          </AppLayout>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    </>
   );
 }
 

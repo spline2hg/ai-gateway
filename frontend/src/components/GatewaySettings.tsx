@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Gateway } from '../types';
 import { Copy, Check, Key, RefreshCw, AlertTriangle, Shield, Eye, EyeOff } from 'lucide-react';
 import { analyticsApi } from '../services/apiService';
+import { BACKEND_URL } from '../services/config';
 
 interface GatewaySettingsProps {
   gateway: Gateway;
@@ -209,7 +210,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
                 <div className="text-blue-600 dark:text-blue-400 mb-2">client = OpenAI(</div>
                 <div className="ml-4">
                   <div>api_key=<span className="text-green-600 dark:text-green-400">"PROVIDER_API_KEY"</span>,</div>
-                  <div>base_url=<span className="text-green-600 dark:text-green-400">"http://localhost:8000"</span>,  <span className="text-gray-600 dark:text-gray-500"># change the base url if needed</span></div>
+                  <div>base_url=<span className="text-green-600 dark:text-green-400">"{BACKEND_URL}"</span>,</div>
                   <div>default_headers=<span className="text-blue-600 dark:text-blue-400">{'{'}</span></div>
                   <div className="ml-4">
                     <div>"X-Gateway-Authorization": <span className="text-green-600 dark:text-green-400">"{credentials.secret}"</span>,</div>
