@@ -1,12 +1,12 @@
 import json
 import os
 from pathlib import Path
-from clickhouse_sqlalchemy.engines import base
 from fastapi import HTTPException
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 PROVIDERS_FILE = DATA_DIR / "providers.json"
 MODELS_FILE = DATA_DIR / "models.json"
+ALL_MODELS_FILE = DATA_DIR / "all-models.json"
 
 
 class ModelRegistry:
@@ -14,6 +14,7 @@ class ModelRegistry:
         self.providers: dict = {}
         self.model_to_provider: dict = {}
         self.model_cost: dict = {}
+        self.all_models: list = []
 
     def initialize(self):
         with open(PROVIDERS_FILE) as f:
@@ -29,7 +30,11 @@ class ModelRegistry:
             if data.get("cost"):
                 self.model_cost[model_id] = data["cost"]
 
-        print(f"Registry ready: {len(self.providers)} providers, {len(self.model_to_provider)} models, {len(self.model_cost)} priced")
+        if ALL_MODELS_FILE.exists():
+            with open(ALL_MODELS_FILE) as f:
+                self.all_models = json.load(f)
+
+        print(f"Registry ready: {len(self.providers)} providers, {len(self.model_to_provider)} models, {len(self.all_models)} all entries, {len(self.model_cost)} priced")
 
     def resolve_route(self, model_name: str):
         if model_name == "free":
