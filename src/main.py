@@ -11,13 +11,14 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from db import Base, engine, get_db, Gateway, User
 from models import ChatCompletionRequest, GatewayCreate
-from utils import resolve_route, validate_gateway, extract_status_code_from_error, get_cost, make_cache_key, analytics_cache, generate_username, get_current_user
+from utils import validate_gateway, extract_status_code_from_error, make_cache_key, analytics_cache, generate_username, get_current_user
 from analytics import save_analytics, Analytics_Base, analytics_engine, _Session, RequestAnalytics
+from model_registry import registry
 
-from fastapi import FastAPI, Header, Query, Depends, HTTPException
+from fastapi import FastAPI, Header, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from openai import AsyncOpenAI
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 app = FastAPI(title="OpenAI-compatible API")
@@ -37,7 +38,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # Create tables during startup if engine is available
+    registry.initialize()
+
     if analytics_engine:
         try:
             Analytics_Base.metadata.create_all(analytics_engine)
@@ -52,6 +54,20 @@ async def startup():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+@app.get("/v1/models")
+async def list_models():
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": model_id,
+                "object": "model",
+                "owned_by": provider_id,
+            }
+            for model_id, provider_id in registry.model_to_provider.items()
+        ],
+    }
 
 @app.post("/chat/completions")
 async def chat_completions(
@@ -78,7 +94,7 @@ async def chat_completions(
     print(x_gateway_authorization, x_gateway_id)
     # mapped_llm_url = "https://portal.qwen.ai/v1/"
     
-    model_name, provider, mapped_llm_url, resolved_api_key = resolve_route(request.model)
+    model_name, provider, mapped_llm_url, resolved_api_key = registry.resolve_route(request.model)
     # Use resolved API key if provided, otherwise keep the one from Authorization header
     if resolved_api_key is not None:
         api_key = resolved_api_key
@@ -123,7 +139,7 @@ async def chat_completions(
                 if usage_dict:
                     tokens_prompt = usage_dict.prompt_tokens
                     tokens_completion = usage_dict.completion_tokens
-                    cost_estimate = get_cost(model_name, provider, tokens_prompt, tokens_completion)
+                    cost_estimate = registry.get_cost(provider, model_name, tokens_prompt, tokens_completion)
                 else:
                     tokens_prompt = 0
                     tokens_completion = 0
@@ -207,7 +223,7 @@ async def chat_completions(
             
             tokens_prompt = upstream.usage.prompt_tokens
             tokens_completion = upstream.usage.completion_tokens
-            cost_estimate = get_cost(model_name, provider, tokens_prompt, tokens_completion)
+            cost_estimate = registry.get_cost(provider, model_name, tokens_prompt, tokens_completion)
             print(tokens_prompt, tokens_completion, cost_estimate)
 
             # Use timing data from the upstream response
