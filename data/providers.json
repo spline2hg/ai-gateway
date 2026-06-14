@@ -1,4 +1,5 @@
 {
+  "free": "https://aigatewayfreemodels.com/v1",
   "upstage": "https://api.upstage.ai/v1/solar",
   "clarifai": "https://api.clarifai.com/v2/ext/openai/v1",
   "ollama-cloud": "https://ollama.com/v1",

@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from clickhouse_sqlalchemy.engines import base
 from fastapi import HTTPException
 
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -32,8 +33,10 @@ class ModelRegistry:
 
     def resolve_route(self, model_name: str):
         if model_name == "free":
+            base_url = os.getenv("FREE_MODEL_BASE_URL")
             api_key = os.getenv("FREE_MODEL_API_KEY")
-            return "gemini-2.5-flash", "google", "https://generativelanguage.googleapis.com/v1beta/openai/", api_key
+            actual_model = os.getenv("FREE_MODEL_NAME")
+            return actual_model, "free", base_url, api_key
 
         if "/" in model_name:
             provider_id, model_id = model_name.split("/", 1)
