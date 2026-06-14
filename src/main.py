@@ -15,29 +15,16 @@ from utils import validate_gateway, extract_status_code_from_error, make_cache_k
 from analytics import save_analytics, analytics_engine, _Session, RequestAnalytics, Analytics_Base, ANALYTICS_BACKEND
 from model_registry import registry
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Header, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from openai import AsyncOpenAI
 from typing import Optional
 
 
-app = FastAPI(title="OpenAI-compatible API")
-
-# Get CORS origins from environment or use default for local development
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
-cors_origins = [origin.strip() for origin in cors_origins]
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     registry.initialize()
 
     if ANALYTICS_BACKEND == "tinybird":
@@ -52,6 +39,30 @@ async def startup():
         print("Analytics backend: disabled (no database available)")
 
     Base.metadata.create_all(engine)
+
+    yield
+
+    # Shutdown
+    engine.dispose()
+    if analytics_engine:
+        analytics_engine.dispose()
+    analytics_cache.clear()
+
+
+app = FastAPI(title="OpenAI-compatible API", lifespan=lifespan)
+
+# Get CORS origins from environment or use default for local development
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+cors_origins = [origin.strip() for origin in cors_origins]
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 async def health():
@@ -69,6 +80,20 @@ async def list_models():
             }
             for model_id, provider_id in registry.model_to_provider.items()
         ],
+    }
+
+@app.get("/models/list")
+async def list_models_with_cost():
+    return {
+        "models": [
+            {
+                "id": model_id,
+                "provider": provider_id,
+                "input_cost": registry.model_cost.get(model_id, {}).get("input", 0),
+                "output_cost": registry.model_cost.get(model_id, {}).get("output", 0),
+            }
+            for model_id, provider_id in registry.model_to_provider.items()
+        ]
     }
 
 @app.post("/chat/completions")
@@ -310,203 +335,211 @@ async def chat_completions(
 @app.get("/analytics/{gateway_id}")
 async def get_gateway_analytics(
     gateway_id: str,
-    days: int = Query(default=30, description="Number of days to look back", ge=1, le=365),
-    include_logs: bool = Query(default=False, description="Include full log records in response")
+    days: int = Query(default=30, ge=1, le=365),
+    advanced: bool = Query(default=False, description="Include model breakdown and daily stats")
 ):
-    """
-    Get comprehensive analytics for a specific gateway
-    Returns request counts, token usage, costs, latency, error rates, model breakdown, and optional full logs
-    """
     global analytics_engine, _Session
     if not analytics_engine or not _Session:
         return {"error": "Analytics database not available"}
 
-    cache_key = make_cache_key(gateway_id, days, include_logs)
-    
+    cache_key = f"analytics:{gateway_id}:{days}:{advanced}"
+
     if cache_key in analytics_cache:
-        print("cached")
         return analytics_cache[cache_key]
     try:
         from datetime import datetime, timedelta, UTC
-        from sqlalchemy import func, text
+        from sqlalchemy import func, text, case
 
         session = _Session()
-
-        # Calculate date range (using timezone-aware UTC)
         end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
-        # Base query for gateway's data within date range
         base_query = session.query(RequestAnalytics).filter(
             RequestAnalytics.gateway_id == gateway_id,
             RequestAnalytics.timestamp >= start_date,
             RequestAnalytics.timestamp <= end_date
         )
 
-        # Total requests
         total_requests = base_query.count()
 
         if total_requests == 0:
-            return {
+            empty = {
                 "gateway_id": gateway_id,
-                "date_range": {
-                    "start_date": start_date.isoformat(),
-                    "end_date": end_date.isoformat(),
-                    "days": days
-                },
-                "summary": {
-                    "total_requests": 0,
-                    "tokens_in": 0,
-                    "tokens_out": 0,
-                    "total_tokens": 0,
-                    "total_cost": 0.0,
-                    "avg_latency": 0.0,
-                    "error_count": 0,
-                    "error_rate": 0.0
-                },
-                "model_breakdown": {},
-                "daily_stats": []
+                "date_range": {"start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "days": days},
+                "summary": {"total_requests": 0, "tokens_in": 0, "tokens_out": 0, "total_tokens": 0, "total_cost": 0.0, "avg_latency": 0.0, "error_count": 0, "error_rate": 0.0, "success_rate": 100.0},
             }
+            if advanced:
+                empty["model_breakdown"] = {}
+                empty["daily_stats"] = []
+            session.close()
+            return empty
 
-        # Token statistics
-        token_stats = base_query.with_entities(
-            func.sum(RequestAnalytics.tokens_prompt).label('total_tokens_in'),
-            func.sum(RequestAnalytics.tokens_completion).label('total_tokens_out'),
-            func.sum(RequestAnalytics.cost).label('total_cost')
-        ).first()
-
-        # Latency statistics (only for successful requests)
-        latency_stats = base_query.filter(
-            RequestAnalytics.status == True,
-            RequestAnalytics.latency.isnot(None)
-        ).with_entities(
-            func.avg(RequestAnalytics.latency).label('avg_latency'),
-            func.min(RequestAnalytics.latency).label('min_latency'),
-            func.max(RequestAnalytics.latency).label('max_latency')
-        ).first()
-
-        # Error statistics
-        error_count = base_query.filter(RequestAnalytics.status == False).count()
-        error_rate = (error_count / total_requests) * 100 if total_requests > 0 else 0
-
-        # Model usage breakdown
-        model_stats = base_query.with_entities(
-            RequestAnalytics.model,
-            func.count(RequestAnalytics.id).label('count'),
+        summary_row = base_query.with_entities(
             func.sum(RequestAnalytics.tokens_prompt).label('tokens_in'),
             func.sum(RequestAnalytics.tokens_completion).label('tokens_out'),
-            func.sum(RequestAnalytics.cost).label('cost'),
-            func.avg(RequestAnalytics.latency).label('avg_latency')
-        ).group_by(RequestAnalytics.model).all()
+            func.sum(RequestAnalytics.cost).label('total_cost'),
+            func.avg(RequestAnalytics.latency).label('avg_latency'),
+            func.min(RequestAnalytics.latency).label('min_latency'),
+            func.max(RequestAnalytics.latency).label('max_latency'),
+            func.sum(case((RequestAnalytics.status == False, 1), else_=0)).label('error_count'),
+        ).first()
 
-        # Format model breakdown
-        model_breakdown = {}
-        for model_stat in model_stats:
-            model_breakdown[model_stat.model] = {
-                "requests": model_stat.count,
-                "tokens_in": model_stat.tokens_in or 0,
-                "tokens_out": model_stat.tokens_out or 0,
-                "total_tokens": (model_stat.tokens_in or 0) + (model_stat.tokens_out or 0),
-                "cost": safe_float(model_stat.cost),
-                "avg_latency": safe_float(model_stat.avg_latency)
-            }
+        error_count = summary_row.error_count or 0
+        error_rate = (error_count / total_requests) * 100 if total_requests > 0 else 0
 
-        # Daily statistics for the requested time range
-        daily_stats = []
-        for i in range(days):
-            day_start = end_date - timedelta(days=i)
-            day_end = day_start + timedelta(days=1)
-
-            day_query = base_query.filter(
-                RequestAnalytics.timestamp >= day_start,
-                RequestAnalytics.timestamp < day_end
-            )
-
-            day_requests = day_query.count()
-            if day_requests > 0:
-                day_tokens = day_query.with_entities(
-                    func.sum(RequestAnalytics.tokens_prompt).label('tokens_in'),
-                    func.sum(RequestAnalytics.tokens_completion).label('tokens_out'),
-                    func.sum(RequestAnalytics.cost).label('cost')
-                ).first()
-
-                day_errors = day_query.filter(RequestAnalytics.status == False).count()
-
-                daily_stats.append({
-                    "date": day_start.date().isoformat(),
-                    "requests": day_requests,
-                    "tokens_in": day_tokens.tokens_in or 0,
-                    "tokens_out": day_tokens.tokens_out or 0,
-                    "cost": float(day_tokens.cost or 0),
-                    "errors": day_errors,
-                    "success_rate": ((day_requests - day_errors) / day_requests) * 100
-                })
-
-        # Retrieve full logs if requested
-        logs = []
-        if include_logs:
-            log_records = base_query.order_by(RequestAnalytics.timestamp.desc()).all()
-
-            for record in log_records:
-                log_entry = {
-                    "id": record.id,
-                    "response_id": record.response_id,
-                    "timestamp": record.timestamp.isoformat() if record.timestamp else None,
-                    "gateway_id": record.gateway_id,
-                    "model": record.model,
-                    "provider": record.provider,
-                    "tokens_prompt": record.tokens_prompt,
-                    "tokens_completion": record.tokens_completion,
-                    "tokens_total": record.tokens_total,
-                    "request_type": record.request_type,
-                    "status": record.status,
-                    "cost": float(record.cost) if record.cost else 0,
-                    "latency": float(record.latency) if record.latency else None,
-                    "queue_time": float(record.queue_time) if record.queue_time else None,
-                    "prompt_time": float(record.prompt_time) if record.prompt_time else None,
-                    "completion_time": float(record.completion_time) if record.completion_time else None,
-                    "error_message": record.error_message,
-                    "prompt_text": record.prompt_text,
-                    "response_text": record.response_text,
-                    "http_status_code": record.http_status_code,
-                    "endpoint": record.endpoint
-                }
-                logs.append(log_entry)
-
-        # Prepare response
         response = {
             "gateway_id": gateway_id,
-            "date_range": {
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat(),
-                "days": days
-            },
+            "date_range": {"start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "days": days},
             "summary": {
                 "total_requests": total_requests,
-                "tokens_in": token_stats.total_tokens_in or 0,
-                "tokens_out": token_stats.total_tokens_out or 0,
-                "total_tokens": (token_stats.total_tokens_in or 0) + (token_stats.total_tokens_out or 0),
-                "total_cost": safe_float(token_stats.total_cost),
-                "avg_latency": safe_float(latency_stats.avg_latency),
-                "min_latency": safe_float(latency_stats.min_latency),
-                "max_latency": safe_float(latency_stats.max_latency),
+                "tokens_in": summary_row.tokens_in or 0,
+                "tokens_out": summary_row.tokens_out or 0,
+                "total_tokens": (summary_row.tokens_in or 0) + (summary_row.tokens_out or 0),
+                "total_cost": safe_float(summary_row.total_cost),
+                "avg_latency": safe_float(summary_row.avg_latency),
+                "min_latency": safe_float(summary_row.min_latency),
+                "max_latency": safe_float(summary_row.max_latency),
                 "error_count": error_count,
                 "error_rate": round(error_rate, 2),
                 "success_rate": round(100 - error_rate, 2),
-                "log_count": len(logs)
             },
-            "model_breakdown": model_breakdown,
-            "daily_stats": list(reversed(daily_stats)),  # Most recent first
-            "logs": logs if include_logs else None
         }
-        analytics_cache[cache_key] = response
 
+        if advanced:
+            model_stats = base_query.with_entities(
+                RequestAnalytics.model,
+                func.count(RequestAnalytics.id).label('count'),
+                func.sum(RequestAnalytics.tokens_prompt).label('tokens_in'),
+                func.sum(RequestAnalytics.tokens_completion).label('tokens_out'),
+                func.sum(RequestAnalytics.cost).label('cost'),
+                func.avg(RequestAnalytics.latency).label('avg_latency')
+            ).group_by(RequestAnalytics.model).all()
+
+            response["model_breakdown"] = {
+                ms.model: {
+                    "requests": ms.count,
+                    "tokens_in": ms.tokens_in or 0,
+                    "tokens_out": ms.tokens_out or 0,
+                    "total_tokens": (ms.tokens_in or 0) + (ms.tokens_out or 0),
+                    "cost": safe_float(ms.cost),
+                    "avg_latency": safe_float(ms.avg_latency)
+                } for ms in model_stats
+            }
+
+            daily_rows = base_query.with_entities(
+                func.toDate(RequestAnalytics.timestamp).label('day'),
+                func.count(RequestAnalytics.id).label('requests'),
+                func.sum(RequestAnalytics.tokens_prompt).label('tokens_in'),
+                func.sum(RequestAnalytics.tokens_completion).label('tokens_out'),
+                func.sum(RequestAnalytics.cost).label('cost'),
+                func.sum(case((RequestAnalytics.status == False, 1), else_=0)).label('errors'),
+            ).group_by(func.toDate(RequestAnalytics.timestamp)).order_by(text('day')).all()
+
+            response["daily_stats"] = [{
+                "date": str(dr.day),
+                "requests": dr.requests,
+                "tokens_in": dr.tokens_in or 0,
+                "tokens_out": dr.tokens_out or 0,
+                "cost": safe_float(dr.cost),
+                "errors": dr.errors,
+                "success_rate": round(((dr.requests - dr.errors) / dr.requests) * 100, 2)
+            } for dr in daily_rows]
+
+        analytics_cache[cache_key] = response
         session.close()
         return response
 
     except Exception as e:
         print(f"Error fetching analytics: {e}")
         return {"error": f"Failed to fetch analytics: {str(e)}"}
+
+
+@app.get("/logs/{gateway_id}")
+async def get_gateway_logs(
+    gateway_id: str,
+    days: int = Query(default=30, ge=1, le=365),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    model: Optional[str] = Query(default=None),
+    status: Optional[str] = Query(default=None, description="success or error"),
+    search: Optional[str] = Query(default=None, description="Search in model, response_id, error_message"),
+):
+    global analytics_engine, _Session
+    if not analytics_engine or not _Session:
+        return {"error": "Analytics database not available"}
+
+    try:
+        from datetime import datetime, timedelta, UTC
+        from sqlalchemy import func, case
+
+        session = _Session()
+        end_date = datetime.now(UTC)
+        start_date = end_date - timedelta(days=days)
+
+        query = session.query(RequestAnalytics).filter(
+            RequestAnalytics.gateway_id == gateway_id,
+            RequestAnalytics.timestamp >= start_date,
+            RequestAnalytics.timestamp <= end_date
+        )
+
+        if model:
+            query = query.filter(RequestAnalytics.model == model)
+        if status == "success":
+            query = query.filter(RequestAnalytics.status == True)
+        elif status == "error":
+            query = query.filter(RequestAnalytics.status == False)
+        if search:
+            search_pattern = f"%{search}%"
+            query = query.filter(
+                (RequestAnalytics.model.ilike(search_pattern)) |
+                (RequestAnalytics.response_id.ilike(search_pattern)) |
+                (RequestAnalytics.error_message.ilike(search_pattern))
+            )
+
+        total = query.count()
+        total_pages = max(1, (total + page_size - 1) // page_size)
+
+        records = query.order_by(RequestAnalytics.timestamp.desc()).offset((page - 1) * page_size).limit(page_size).all()
+
+        logs = [{
+            "id": r.id, "response_id": r.response_id,
+            "timestamp": r.timestamp.isoformat() if r.timestamp else None,
+            "gateway_id": r.gateway_id, "model": r.model, "provider": r.provider,
+            "tokens_prompt": r.tokens_prompt, "tokens_completion": r.tokens_completion,
+            "tokens_total": r.tokens_total, "request_type": r.request_type, "status": r.status,
+            "cost": safe_float(r.cost),
+            "latency": safe_float(r.latency) if r.latency else None,
+            "queue_time": safe_float(r.queue_time) if r.queue_time else None,
+            "prompt_time": safe_float(r.prompt_time) if r.prompt_time else None,
+            "completion_time": safe_float(r.completion_time) if r.completion_time else None,
+            "error_message": r.error_message, "prompt_text": r.prompt_text,
+            "response_text": r.response_text, "http_status_code": r.http_status_code,
+            "endpoint": r.endpoint
+        } for r in records]
+
+        models = session.query(RequestAnalytics.model).filter(
+            RequestAnalytics.gateway_id == gateway_id,
+            RequestAnalytics.timestamp >= start_date,
+            RequestAnalytics.timestamp <= end_date
+        ).distinct().all()
+
+        session.close()
+        return {
+            "logs": logs,
+            "pagination": {
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+            },
+            "filters": {
+                "available_models": [m[0] for m in models],
+            }
+        }
+
+    except Exception as e:
+        print(f"Error fetching logs: {e}")
+        return {"error": f"Failed to fetch logs: {str(e)}"}
 
 
 
