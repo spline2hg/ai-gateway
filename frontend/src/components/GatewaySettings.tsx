@@ -82,9 +82,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
         {/* Gateway Information */}
         <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-800/30 flex items-center justify-center">
-              <Shield size={20} className="text-blue-600 dark:text-blue-400" />
-            </div>
+            <Shield size={20} className="text-gray-600 dark:text-gray-400" />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Gateway Information</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Basic gateway details</p>
@@ -127,9 +125,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
         {/* API Credentials */}
         <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-800/30 flex items-center justify-center">
-              <Key size={20} className="text-green-600 dark:text-green-400" />
-            </div>
+            <Key size={20} className="text-gray-600 dark:text-gray-400" />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">API Credentials</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Secret key for authentication</p>
@@ -174,7 +170,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
             <div className="pt-4 border-t border-gray-300 dark:border-gray-800">
               <button
                 onClick={() => setShowRegenerateConfirm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md text-sm font-medium hover:bg-orange-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
               >
                 <RefreshCw size={14} />
                 Regenerate Secret Key
@@ -190,9 +186,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
       {/* Usage Instructions */}
       <div className="mt-8 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-800/30 flex items-center justify-center">
-            <AlertTriangle size={20} className="text-purple-600 dark:text-purple-400" />
-          </div>
+          <AlertTriangle size={20} className="text-gray-600 dark:text-gray-400" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Usage Instructions</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">How to use your gateway credentials</p>
@@ -205,39 +199,39 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
           </div>
         ) : credentials ? (
           <>
-            <div className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 font-mono text-sm text-gray-800 dark:text-gray-300">
+            <div className="bg-gray-100 dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg p-4 font-mono text-sm text-gray-800 dark:text-gray-300">
               <div className="mb-4">
-                <div className="text-blue-600 dark:text-blue-400 mb-2">client = OpenAI(</div>
+                <div className="text-gray-600 dark:text-gray-500 mb-2">client = OpenAI(</div>
                 <div className="ml-4">
                   <div>api_key=<span className="text-green-600 dark:text-green-400">"PROVIDER_API_KEY"</span>,</div>
                   <div>base_url=<span className="text-green-600 dark:text-green-400">"{BACKEND_URL}"</span>,</div>
-                  <div>default_headers=<span className="text-blue-600 dark:text-blue-400">{'{'}</span></div>
+                  <div>default_headers=<span className="text-gray-600 dark:text-gray-500">{'{'}</span></div>
                   <div className="ml-4">
                     <div>"X-Gateway-Authorization": <span className="text-green-600 dark:text-green-400">"{credentials.secret}"</span>,</div>
                     <div>"X-Gateway-ID": <span className="text-green-600 dark:text-green-400">"{gateway.id}"</span>,</div>
                   </div>
-                  <div><span className="text-blue-600 dark:text-blue-400">{'}'}</span></div>
+                  <div><span className="text-gray-600 dark:text-gray-500">{'}'}</span></div>
                 </div>
-                <div className="text-blue-600 dark:text-blue-400">)</div>
+                <div className="text-gray-600 dark:text-gray-500">)</div>
               </div>
 
 
               <div className="mb-2">
-                <div className="text-blue-600 dark:text-blue-400">chat_completion = client.chat.completions.create(</div>
+                <div className="text-gray-600 dark:text-gray-500">chat_completion = client.chat.completions.create(</div>
                 <div className="ml-4">
                   <div>messages=[<span className="text-green-600 dark:text-green-400">{`{"role": "user", "content": "whats the meaning of life ?"}`}</span>],</div>
                   <div>model=<span className="text-green-600 dark:text-green-400">"cerebras/zai-glm-4.6"</span>,  <span className="text-gray-600 dark:text-gray-500"># Replace with your model name</span></div>
                   <div># stream=True,</div>
                 </div>
-                <div className="text-blue-600 dark:text-blue-400">)</div>
+                <div className="text-gray-600 dark:text-gray-500">)</div>
               </div>
             </div>
 
             <div className="mt-4 text-sm text-gray-700 dark:text-gray-400">
               <p className="mb-2"><strong>Headers to include in your API requests:</strong></p>
               <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded p-2 space-y-1 text-xs">
-                <div><span className="text-blue-600 dark:text-blue-400">X-Gateway-ID:</span> {gateway.id}</div>
-                <div><span className="text-blue-600 dark:text-blue-400">X-Gateway-Authorization:</span> {credentials.secret}</div>
+                <div><span className="text-gray-600 dark:text-gray-500">X-Gateway-ID:</span> {gateway.id}</div>
+                <div><span className="text-gray-600 dark:text-gray-500">X-Gateway-Authorization:</span> {credentials.secret}</div>
               </div>
             </div>
           </>
@@ -269,7 +263,7 @@ const GatewaySettings: React.FC<GatewaySettingsProps> = ({ gateway }) => {
                 <button
                   onClick={handleRegenerateSecret}
                   disabled={regenerating}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-md text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {regenerating ? 'Regenerating...' : 'Regenerate Key'}
                 </button>

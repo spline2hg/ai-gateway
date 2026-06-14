@@ -72,7 +72,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
         setError(null);
 
         // Fetch analytics for the specific gateway with selected time range
-        const data = await analyticsApi.fetchGatewayAnalytics(gatewayId || 'default_gateway', timeRange, false);
+        const data = await analyticsApi.fetchGatewayAnalytics(gatewayId || 'default_gateway', timeRange, true);
         console.log('Analytics data received:', {
           requestedDays: timeRange,
           actualDays: data.daily_stats?.length,

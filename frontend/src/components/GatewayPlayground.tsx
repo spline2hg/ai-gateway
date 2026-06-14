@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Bot, User, Terminal, Sparkles, RefreshCw, StopCircle, CornerDownLeft } from 'lucide-react';
-import { generateCompletion } from '../services/geminiService';
+import { generateCompletion, ChatMessage } from '../services/chatService';
 import { analyticsApi } from '../services/apiService';
 import { LogEntry, Gateway } from '../types';
 import { generateId } from '../utils';
@@ -10,15 +10,30 @@ interface GatewayPlaygroundProps {
   onNewLog: (log: LogEntry) => void;
 }
 
-interface Message {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
+const CHAT_STORAGE_PREFIX = 'chat_playground_';
+
+function getStorageKey(gatewayId: string): string {
+  return `${CHAT_STORAGE_PREFIX}${gatewayId}`;
+}
+
+function loadMessages(gatewayId: string): ChatMessage[] {
+  try {
+    const stored = localStorage.getItem(getStorageKey(gatewayId));
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return [];
+}
+
+function saveMessages(gatewayId: string, messages: ChatMessage[]): void {
+  localStorage.setItem(getStorageKey(gatewayId), JSON.stringify(messages));
 }
 
 const GatewayPlayground: React.FC<GatewayPlaygroundProps> = ({ gateway, onNewLog }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: 'Note: These chat messages are not saved and will be lost when you refresh.' }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadMessages(gateway.id));
   const [input, setInput] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('You are a helpful AI assistant.');
   const [loading, setLoading] = useState(false);
@@ -43,6 +58,10 @@ const GatewayPlayground: React.FC<GatewayPlaygroundProps> = ({ gateway, onNewLog
     fetchCredentials();
   }, [gateway.id]);
 
+  useEffect(() => {
+    saveMessages(gateway.id, messages);
+  }, [messages, gateway.id]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -64,10 +83,13 @@ const GatewayPlayground: React.FC<GatewayPlaygroundProps> = ({ gateway, onNewLog
 
     const userMsg = input;
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+
+    const userMessage: ChatMessage = { role: 'user', content: userMsg };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setLoading(true);
 
-    const result = await generateCompletion(userMsg, 'free', gateway.id, credentials.secret, systemPrompt);
+    const result = await generateCompletion(updatedMessages, 'free', gateway.id, credentials.secret, systemPrompt);
 
     setLoading(false);
 
@@ -135,11 +157,14 @@ const GatewayPlayground: React.FC<GatewayPlaygroundProps> = ({ gateway, onNewLog
               <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-500 border border-emerald-300 dark:border-emerald-500/20 font-mono">free</span>
            </div>
            <button 
-             onClick={() => setMessages([{ role: 'system', content: `Connected to ${gateway.name} environment.` }])}
+             onClick={() => {
+               setMessages([]);
+               localStorage.removeItem(getStorageKey(gateway.id));
+             }}
              className="text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors" title="Clear Chat"
             >
               <RefreshCw size={14} />
-           </button>
+            </button>
         </div>
         
         {/* Messages */}

@@ -22,22 +22,20 @@ const Navbar: React.FC = () => {
   }, []);
 
   const getNavLinks = () => {
+    const links = [{ label: 'Dashboard', path: '/dashboard' }, { label: 'Models', path: '/models' }];
     if (location.pathname === '/dashboard') {
-      return [{ label: 'Profile', path: '/profile' }];
+      return [...links, { label: 'Profile', path: '/profile' }];
     }
     if (location.pathname === '/profile') {
-      return [{ label: 'Dashboard', path: '/dashboard' }];
+      return [{ label: 'Dashboard', path: '/dashboard' }, { label: 'Models', path: '/models' }];
+    }
+    if (location.pathname === '/models') {
+      return [{ label: 'Dashboard', path: '/dashboard' }, { label: 'Profile', path: '/profile' }];
     }
     if (location.pathname.startsWith('/gateway/')) {
-      return [
-        { label: 'Dashboard', path: '/dashboard' },
-        { label: 'Profile', path: '/profile' },
-      ];
+      return [...links, { label: 'Profile', path: '/profile' }];
     }
-    return [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'Profile', path: '/profile' },
-    ];
+    return [...links, { label: 'Profile', path: '/profile' }];
   };
 
   const navLinks = getNavLinks();

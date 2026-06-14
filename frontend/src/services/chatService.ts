@@ -1,8 +1,13 @@
 import OpenAI from "openai";
 import { BACKEND_URL } from './config';
 
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
 export const generateCompletion = async (
-  prompt: string,
+  messages: ChatMessage[],
   modelId: string = 'free',
   gatewayId: string = 'demo-gateway',
   gatewaySecret: string = 'demo-key',
@@ -15,7 +20,7 @@ export const generateCompletion = async (
       model: modelId,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: prompt }
+        ...messages.map(m => ({ role: m.role, content: m.content }))
       ],
     };
 
@@ -65,7 +70,8 @@ export const generateCompletion = async (
     const text = choice.message.content;
 
     // Rough token estimation for demo purposes
-    const inputTokens = Math.ceil(prompt.length / 4);
+    const inputText = messages.map(m => m.content).join(' ');
+    const inputTokens = Math.ceil(inputText.length / 4);
     const outputTokens = Math.ceil(text.length / 4);
 
     return {

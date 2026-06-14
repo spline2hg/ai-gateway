@@ -113,12 +113,11 @@ export const convertBackendLogToFrontend = (backendLog: BackendLogEntry): LogEnt
 
 // API service functions
 export const analyticsApi = {
-  // Fetch analytics data for a specific gateway
-  async fetchGatewayAnalytics(gatewayId: string, days: number = 30, includeLogs: boolean = false): Promise<BackendAnalyticsResponse> {
+  async fetchGatewayAnalytics(gatewayId: string, days: number = 30, advanced: boolean = false): Promise<BackendAnalyticsResponse> {
     try {
       const headers = getAuthHeaders();
       const response = await fetch(
-        `${BACKEND_URL}/analytics/${gatewayId}?days=${days}&include_logs=${includeLogs}`,
+        `${BACKEND_URL}/analytics/${gatewayId}?days=${days}&advanced=${advanced}`,
         { headers }
       );
 
@@ -126,31 +125,45 @@ export const analyticsApi = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (error) {
       console.error('Error fetching gateway analytics:', error);
       throw error;
     }
   },
 
-  // Fetch logs for a specific gateway (converts to frontend format)
-  async fetchGatewayLogs(gatewayId: string, days: number = 30): Promise<LogEntry[]> {
+  async fetchGatewayLogs(
+    gatewayId: string,
+    opts: { days?: number; page?: number; page_size?: number; model?: string; status?: string; search?: string } = {}
+  ): Promise<{ logs: LogEntry[]; pagination: { total: number; page: number; page_size: number; total_pages: number }; available_models: string[] }> {
     try {
-      const analyticsData = await this.fetchGatewayAnalytics(gatewayId, days, true);
+      const headers = getAuthHeaders();
+      const params = new URLSearchParams();
+      if (opts.days) params.set('days', String(opts.days));
+      if (opts.page) params.set('page', String(opts.page));
+      if (opts.page_size) params.set('page_size', String(opts.page_size));
+      if (opts.model) params.set('model', opts.model);
+      if (opts.status) params.set('status', opts.status);
+      if (opts.search) params.set('search', opts.search);
 
-      if (!analyticsData.logs) {
-        return [];
+      const response = await fetch(`${BACKEND_URL}/logs/${gatewayId}?${params.toString()}`, { headers });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return analyticsData.logs.map(convertBackendLogToFrontend);
+      const data = await response.json();
+      return {
+        logs: (data.logs || []).map(convertBackendLogToFrontend),
+        pagination: data.pagination,
+        available_models: data.filters?.available_models || [],
+      };
     } catch (error) {
-      console.error('Error fetching gateway logs:', error);
+      console.error('Error fetching logs:', error);
       throw error;
     }
   },
 
-  // Get summary analytics for a gateway
   async getGatewaySummary(gatewayId: string, days: number = 30) {
     try {
       const analyticsData = await this.fetchGatewayAnalytics(gatewayId, days, false);

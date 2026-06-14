@@ -4,6 +4,7 @@ import { Gateway, LogEntry } from './types';
 import Dashboard from './components/Dashboard';
 import GatewayView from './components/GatewayView';
 import Profile from './components/Profile';
+import ModelsPage from './components/ModelsPage';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import { analyticsApi } from './services/apiService';
@@ -95,7 +96,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans selection:bg-gray-200 dark:selection:bg-gray-800 selection:text-gray-900 dark:selection:text-white">
       <Navbar />
-      <main className="pt-14">{children}</main>
+      <main className="pt-20">{children}</main>
     </div>
   );
 }
@@ -307,6 +308,16 @@ function App() {
             <ProtectedRoute loading={loading} error={error}>
               <AppLayout>
                 <Profile />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/models"
+          element={
+            <ProtectedRoute loading={loading} error={error}>
+              <AppLayout>
+                <ModelsPage />
               </AppLayout>
             </ProtectedRoute>
           }

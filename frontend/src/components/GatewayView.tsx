@@ -67,7 +67,7 @@ const GatewayView: React.FC<GatewayViewProps> = ({ gateway, logs, onBack, onNewL
       <div className="flex-1 overflow-auto bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto p-6 h-full animate-fade-in">
           {activeTab === 'overview' && <GatewayOverview gateway={gateway} logs={filteredLogs} />}
-          {activeTab === 'logs' && <GatewayLogs gatewayId={gateway.id} initialLogs={[]} />}
+          {activeTab === 'logs' && <GatewayLogs gatewayId={gateway.id} />}
           {activeTab === 'analytics' && <GatewayAnalytics gatewayId={gateway.id} logs={[]} />}
           {activeTab === 'playground' && <GatewayPlayground gateway={gateway} onNewLog={onNewLog} />}
           {activeTab === 'settings' && <GatewaySettings gateway={gateway} />}

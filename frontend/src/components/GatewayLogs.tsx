@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LogEntry } from '../types';
 import { formatDate, formatCurrency } from '../utils';
 import { analyticsApi } from '../services/apiService';
-import { ChevronDown, ChevronRight, Copy, Check, CheckCircle, AlertCircle, Clock, Zap, FileJson, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, Check, ChevronLeft, Loader2 } from 'lucide-react';
 
 interface GatewayLogsProps {
   gatewayId: string;
-  initialLogs: LogEntry[];
 }
 
 const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
@@ -25,7 +24,7 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
       console.error('Failed to copy chat ID:', err);
     }
   };
-  
+
   const getStatusColor = (status: number) => {
     if (status >= 500) return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-400/10 border border-red-300 dark:border-red-400/20';
     if (status >= 400) return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-400/10 border border-orange-300 dark:border-orange-400/20';
@@ -34,7 +33,7 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
 
   return (
     <>
-      <tr 
+      <tr
         className={`border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-900/40 cursor-pointer transition-colors group text-sm ${expanded ? 'bg-gray-50 dark:bg-gray-900/40' : ''}`}
         onClick={() => setExpanded(!expanded)}
       >
@@ -68,13 +67,10 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
         <tr>
           <td colSpan={7} className="px-0 py-0 border-b border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900/20">
             <div className="max-h-[400px] overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
-              
-              {/* Left Column: Metadata */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-2">
                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400 uppercase tracking-wider">Request Details</span>
                 </div>
-
                 <div className="bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-md overflow-hidden">
                     <div className="grid grid-cols-3 border-b border-gray-300 dark:border-gray-800">
                         <div className="p-3 border-r border-gray-300 dark:border-gray-800">
@@ -85,11 +81,7 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
                              <div className="text-[10px] text-gray-600 dark:text-gray-500 uppercase mb-1">Chat ID</div>
                              <div className="flex items-center gap-1 group">
                                  <div className="text-[10px] font-mono text-gray-600 dark:text-gray-400 truncate flex-1" title={log.responseId}>{log.responseId}</div>
-                                 <button
-                                    onClick={handleCopyChatId}
-                                    className="opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white p-0.5 rounded"
-                                    title={copied ? "Copied!" : "Copy Chat ID"}
-                                 >
+                                 <button onClick={handleCopyChatId} className="opacity-0 group-hover:opacity-70 hover:opacity-100 transition-opacity text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white p-0.5 rounded">
                                      {copied ? <Check size={10} /> : <Copy size={10} />}
                                  </button>
                              </div>
@@ -111,13 +103,10 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
                     </div>
                 </div>
               </div>
-
-              {/* Right Column: Response */}
               <div className="space-y-4">
                  <div className="flex items-center justify-between mb-2">
                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-400 uppercase tracking-wider">Response Details</span>
                 </div>
-
                 <div className="bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-md overflow-hidden h-full">
                      <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-300 dark:border-gray-800">
                         <span className="text-[10px] font-medium text-gray-600 dark:text-gray-500">Output</span>
@@ -129,7 +118,6 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
                      </div>
                 </div>
               </div>
-
             </div>
           </td>
         </tr>
@@ -138,103 +126,90 @@ const LogRow: React.FC<{ log: LogEntry }> = ({ log }) => {
   );
 };
 
-const GatewayLogs: React.FC<GatewayLogsProps> = ({ gatewayId, initialLogs }) => {
-  const [logs, setLogs] = useState<LogEntry[]>(initialLogs);
-  const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>(initialLogs);
+const GatewayLogs: React.FC<GatewayLogsProps> = ({ gatewayId }) => {
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const logsPerPage = 10;
+  const [pagination, setPagination] = useState({ total: 0, page: 1, page_size: 20, total_pages: 1 });
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [filterModel, setFilterModel] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const pageSize = 20;
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-        const fetchedLogs = await analyticsApi.fetchGatewayLogs(gatewayId || 'default_gateway', 30);
-        setLogs(fetchedLogs);
-        setFilteredLogs(fetchedLogs);
-      } catch (err) {
-        console.error('Failed to fetch logs:', err);
-        setError('No logs data available');
-        setLogs([]);
-        setFilteredLogs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (gatewayId) {
-      fetchLogs();
+  const fetchLogs = useCallback(async () => {
+    if (!gatewayId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await analyticsApi.fetchGatewayLogs(gatewayId, {
+        page: currentPage,
+        page_size: pageSize,
+        model: filterModel || undefined,
+        status: filterStatus || undefined,
+        search: debouncedSearch || undefined,
+      });
+      setLogs(result.logs);
+      setPagination(result.pagination);
+      setAvailableModels(result.available_models);
+    } catch (err) {
+      console.error('Failed to fetch logs:', err);
+      setError('No logs data available');
+      setLogs([]);
+    } finally {
+      setLoading(false);
     }
-  }, [gatewayId, initialLogs]);
+  }, [gatewayId, currentPage, filterModel, filterStatus, debouncedSearch]);
 
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredLogs(logs);
-      return;
-    }
+    fetchLogs();
+  }, [fetchLogs]);
 
-    const filtered = logs.filter(log =>
-      log.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.status.toString().includes(searchTerm) ||
-      (log.requestBody && JSON.stringify(log.requestBody).toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-
-    setFilteredLogs(filtered);
+  useEffect(() => {
     setCurrentPage(1);
-  }, [logs, searchTerm]);
+  }, [filterModel, filterStatus, debouncedSearch]);
 
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
-  const startIndex = (currentPage - 1) * logsPerPage;
-  const endIndex = startIndex + logsPerPage;
-  const currentLogs = filteredLogs.slice(startIndex, endIndex);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col h-full space-y-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
-            <span className="text-gray-600 dark:text-gray-500 text-sm">Loading logs...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col h-full space-y-4">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800/30 rounded-lg p-6 text-center">
-          <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
-        </div>
-      </div>
-    );
-  }
+  const startIndex = (currentPage - 1) * pageSize;
+  const currentLogs = logs;
 
   return (
     <div className="flex flex-col h-full space-y-4 overflow-hidden">
-
-      {/* Filters Bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex gap-2 items-center">
             <input
                 type="text"
-                placeholder="Search by Request ID, Model, Status, or Content..."
+                placeholder="Search model, ID, error..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white dark:bg-transparent border border-gray-300 dark:border-gray-800 rounded-md px-3 py-1.5 text-xs text-gray-900 dark:text-gray-300 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 w-72 transition-all placeholder:text-gray-600 dark:placeholder:text-gray-600"
+                className="bg-white dark:bg-transparent border border-gray-300 dark:border-gray-800 rounded-md px-3 py-1.5 text-xs text-gray-900 dark:text-gray-300 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 w-56 transition-all placeholder:text-gray-600 dark:placeholder:text-gray-600"
             />
-            <button className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">
-                Filter
-            </button>
+            <select
+                value={filterModel}
+                onChange={(e) => setFilterModel(e.target.value)}
+                className="bg-white dark:bg-transparent border border-gray-300 dark:border-gray-800 rounded-md px-3 py-1.5 text-xs text-gray-900 dark:text-gray-300 focus:outline-none"
+            >
+                <option value="">All models</option>
+                {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="bg-white dark:bg-transparent border border-gray-300 dark:border-gray-800 rounded-md px-3 py-1.5 text-xs text-gray-900 dark:text-gray-300 focus:outline-none"
+            >
+                <option value="">All statuses</option>
+                <option value="success">Success</option>
+                <option value="error">Error</option>
+            </select>
         </div>
         <div className="text-xs text-gray-600 dark:text-gray-500 font-mono">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredLogs.length)} of {filteredLogs.length} logs
+            {pagination.total} total logs
         </div>
       </div>
 
@@ -253,10 +228,12 @@ const GatewayLogs: React.FC<GatewayLogsProps> = ({ gatewayId, initialLogs }) => 
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800/50 bg-white dark:bg-transparent">
-              {currentLogs.length === 0 ? (
+              {loading ? (
+                  <tr><td colSpan={7} className="text-center py-16"><Loader2 size={24} className="text-gray-400 animate-spin mx-auto" /></td></tr>
+              ) : currentLogs.length === 0 ? (
                   <tr>
                       <td colSpan={7} className="text-center py-16 text-gray-600 dark:text-gray-500 text-sm">
-                          {searchTerm ? 'No logs match your search criteria.' : 'No logs found for this period.'}
+                          {searchTerm || filterModel || filterStatus ? 'No logs match your filters.' : 'No logs found for this period.'}
                       </td>
                   </tr>
               ) : (
@@ -268,11 +245,10 @@ const GatewayLogs: React.FC<GatewayLogsProps> = ({ gatewayId, initialLogs }) => 
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {pagination.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30">
             <div className="text-xs text-gray-600 dark:text-gray-500">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {pagination.total_pages}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -286,8 +262,8 @@ const GatewayLogs: React.FC<GatewayLogsProps> = ({ gatewayId, initialLogs }) => 
                 {currentPage}
               </span>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.total_pages))}
+                disabled={currentPage === pagination.total_pages}
                 className="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-300"
               >
                 Next
