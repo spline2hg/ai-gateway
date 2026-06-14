@@ -1,13 +1,19 @@
 import os
+import logging
+import uuid
+import requests
+from datetime import datetime
 from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean
 from clickhouse_sqlalchemy import Table, engines, get_declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
-import uuid
-import logging
 
 Analytics_Base = get_declarative_base()
+
+ANALYTICS_BACKEND = os.getenv("ANALYTICS_BACKEND", "clickhouse")
+TINYBIRD_API_URL = os.getenv("TINYBIRD_API_URL", "https://api.tinybird.co")
+TINYBIRD_TOKEN = os.getenv("TINYBIRD_TOKEN")
+
 
 class RequestAnalytics(Analytics_Base):
     __tablename__ = "request_analytics"
@@ -38,39 +44,23 @@ class RequestAnalytics(Analytics_Base):
     endpoint = Column(String)
 
 
-# Initialize engine only if ClickHouse is available
-import socket
-from contextlib import closing
+# --- ClickHouse engine/session (for reads and clickhouse backend writes) ---
 
 CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL")
 
-    
+
 def is_clickhouse_available():
-    try:
-        if not CLICKHOUSE_URL:
-            print("CLICKHOUSE_URL not set, analytics will be disabled")
-            return False
-        # host = os.getenv("CLICKHOUSE_HOST", "localhost")
-        # port = int(os.getenv("CLICKHOUSE_PORT", 8123))
-        return True
-        # with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-        #     sock.settimeout(1.0)  # 1 second timeout
-        #     result = sock.connect_ex((host, port))
-        #     return result == 0
-    except:
+    if not CLICKHOUSE_URL:
+        print("CLICKHOUSE_URL not set, analytics reads will be disabled")
         return False
+    return True
+
 
 if is_clickhouse_available():
     try:
         analytics_engine = create_engine(
             CLICKHOUSE_URL,
             pool_pre_ping=True,
-            # secure=True
-            # connect_args={
-            #     'protocol': 'https',
-            #     'verify': True  # Recommended for Aiven's trusted certs
-            # }
-            # connect_args={"connect_timeout": 1, "send_receive_timeout": 2},
         )
         _Session = sessionmaker(bind=analytics_engine)
     except Exception as e:
@@ -78,20 +68,79 @@ if is_clickhouse_available():
         analytics_engine = None
         _Session = None
 else:
-    print(f"ClickHouse server not available at {CLICKHOUSE_URL}")
     analytics_engine = None
     _Session = None
+
+
+# --- Save analytics ---
 
 def save_analytics(chat_id=None, gateway_id=None, model=None, provider=None, tokens_prompt=0, tokens_completion=0,
                    request_type=None, status=False, cost=0.0, latency=None, queue_time=None,
                    prompt_time=None, completion_time=None, error_message=None, prompt_text=None,
                    response_text=None, http_status_code=None, endpoint=None):
+    if ANALYTICS_BACKEND == "tinybird":
+        _save_to_tinybird(chat_id, gateway_id, model, provider, tokens_prompt, tokens_completion,
+                          request_type, status, cost, latency, queue_time, prompt_time, completion_time,
+                          error_message, prompt_text, response_text, http_status_code, endpoint)
+    else:
+        _save_to_clickhouse(chat_id, gateway_id, model, provider, tokens_prompt, tokens_completion,
+                            request_type, status, cost, latency, queue_time, prompt_time, completion_time,
+                            error_message, prompt_text, response_text, http_status_code, endpoint)
+
+
+def _save_to_tinybird(chat_id, gateway_id, model, provider, tokens_prompt, tokens_completion,
+                      request_type, status, cost, latency, queue_time, prompt_time, completion_time,
+                      error_message, prompt_text, response_text, http_status_code, endpoint):
+    if not TINYBIRD_TOKEN:
+        print("TINYBIRD_TOKEN not set, skipping analytics save")
+        return
+
+    payload = {
+        "id": str(uuid.uuid4()),
+        "response_id": chat_id or "",
+        "timestamp": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        "gateway_id": gateway_id or "",
+        "model": model or "",
+        "provider": provider or "",
+        "tokens_prompt": tokens_prompt or 0,
+        "tokens_completion": tokens_completion or 0,
+        "tokens_total": (tokens_prompt or 0) + (tokens_completion or 0),
+        "request_type": request_type or "",
+        "status": status or False,
+        "cost": cost or 0.0,
+        "latency": latency or 0.0,
+        "queue_time": queue_time or 0.0,
+        "prompt_time": prompt_time or 0.0,
+        "completion_time": completion_time or 0.0,
+        "error_message": error_message or "",
+        "prompt_text": prompt_text or "",
+        "response_text": response_text or "",
+        "http_status_code": http_status_code or 0,
+        "endpoint": endpoint or "",
+    }
+
+    url = f"{TINYBIRD_API_URL}/v0/events?name=request_analytics"
+    headers = {
+        "Authorization": f"Bearer {TINYBIRD_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=5)
+        if response.status_code not in (200, 202):
+            print(f"Tinybird ingest error ({response.status_code}): {response.text}")
+    except Exception as e:
+        logging.error(f"Tinybird ingest failed: {e}")
+
+
+def _save_to_clickhouse(chat_id, gateway_id, model, provider, tokens_prompt, tokens_completion,
+                        request_type, status, cost, latency, queue_time, prompt_time, completion_time,
+                        error_message, prompt_text, response_text, http_status_code, endpoint):
     global analytics_engine, _Session
     if not analytics_engine or not _Session:
-        # Silently return if ClickHouse is not available
         print("ClickHouse not available, skipping analytics save")
         return
-    
+
     try:
         session = _Session()
         record = RequestAnalytics(

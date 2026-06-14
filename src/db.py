@@ -46,7 +46,7 @@ if ENVIRONMENT == "production":
 else:
     # Use SQLite in development
     engine = create_engine(
-        "sqlite:///./gateway1.db",
+        "sqlite:///./ai-gateway.db",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )

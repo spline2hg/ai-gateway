@@ -11,8 +11,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from db import Base, engine, get_db, Gateway, User
 from models import ChatCompletionRequest, GatewayCreate
-from utils import validate_gateway, extract_status_code_from_error, make_cache_key, analytics_cache, generate_username, get_current_user
-from analytics import save_analytics, Analytics_Base, analytics_engine, _Session, RequestAnalytics
+from utils import validate_gateway, extract_status_code_from_error, make_cache_key, analytics_cache, generate_username, get_current_user, safe_float
+from analytics import save_analytics, analytics_engine, _Session, RequestAnalytics, Analytics_Base, ANALYTICS_BACKEND
 from model_registry import registry
 
 from fastapi import FastAPI, Header, Query, Depends
@@ -40,14 +40,16 @@ app.add_middleware(
 async def startup():
     registry.initialize()
 
-    if analytics_engine:
+    if ANALYTICS_BACKEND == "tinybird":
+        print("Analytics backend: Tinybird (ingestion via Events API)")
+    elif analytics_engine:
         try:
             Analytics_Base.metadata.create_all(analytics_engine)
-            print("ClickHouse connected and tables created")
+            print("Analytics backend: ClickHouse (connected, tables created)")
         except Exception as e:
             print(f"ClickHouse available but failed to create tables: {e}")
     else:
-        print("ClickHouse not available, analytics will be disabled")
+        print("Analytics backend: disabled (no database available)")
 
     Base.metadata.create_all(engine)
 
@@ -405,8 +407,8 @@ async def get_gateway_analytics(
                 "tokens_in": model_stat.tokens_in or 0,
                 "tokens_out": model_stat.tokens_out or 0,
                 "total_tokens": (model_stat.tokens_in or 0) + (model_stat.tokens_out or 0),
-                "cost": float(model_stat.cost or 0),
-                "avg_latency": float(model_stat.avg_latency or 0) if model_stat.avg_latency else 0
+                "cost": safe_float(model_stat.cost),
+                "avg_latency": safe_float(model_stat.avg_latency)
             }
 
         # Daily statistics for the requested time range
@@ -484,10 +486,10 @@ async def get_gateway_analytics(
                 "tokens_in": token_stats.total_tokens_in or 0,
                 "tokens_out": token_stats.total_tokens_out or 0,
                 "total_tokens": (token_stats.total_tokens_in or 0) + (token_stats.total_tokens_out or 0),
-                "total_cost": float(token_stats.total_cost or 0),
-                "avg_latency": float(latency_stats.avg_latency or 0) if latency_stats.avg_latency else 0,
-                "min_latency": float(latency_stats.min_latency or 0) if latency_stats.min_latency else 0,
-                "max_latency": float(latency_stats.max_latency or 0) if latency_stats.max_latency else 0,
+                "total_cost": safe_float(token_stats.total_cost),
+                "avg_latency": safe_float(latency_stats.avg_latency),
+                "min_latency": safe_float(latency_stats.min_latency),
+                "max_latency": safe_float(latency_stats.max_latency),
                 "error_count": error_count,
                 "error_rate": round(error_rate, 2),
                 "success_rate": round(100 - error_rate, 2),

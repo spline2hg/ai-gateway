@@ -1,3 +1,4 @@
+import math
 from fastapi import Depends, HTTPException
 from db import Gateway, get_db
 from cachetools import TTLCache
@@ -11,6 +12,13 @@ from db import User
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def safe_float(val, default=0.0):
+    if val is None:
+        return default
+    f = float(val)
+    return default if math.isnan(f) or math.isinf(f) else f
 
 
 def validate_gateway(gateway_id, auth, db):
