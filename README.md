@@ -3,6 +3,9 @@
 A comprehensive API gateway and monitoring platform for managing multiple LLM (Large Language Model) providers with unified authentication, analytics, and cost tracking.
 
 ---
+<p align="center">
+<img width="800" height="408" alt="image" src="https://github.com/user-attachments/assets/fb6a6a30-2f5a-44ad-910a-5f2955611e13" />
+</p>
 
 ## Overview
 
