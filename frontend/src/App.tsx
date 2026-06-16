@@ -326,8 +326,8 @@ function App() {
       </Routes>
 
       {showCredentialsModal && newGatewayCredentials && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg w-full max-w-md shadow-2xl animate-slide-up">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => { setShowCredentialsModal(false); setNewGatewayCredentials(null); setCopiedId(false); setCopiedSecret(false); }}>
+          <div className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg w-full max-w-md shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Gateway Created Successfully!</h2>
             </div>

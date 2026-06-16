@@ -591,7 +591,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                      tickLine={false}
                      domain={['dataMin - 1', 'dataMax + 10']}
                    />
-                   <Tooltip content={<CustomTooltip />} />
+                   <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                    <Legend />
                    <Line
                      type="monotone"
@@ -632,7 +632,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -679,8 +679,9 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
                       tickLine={false}
+                      tickFormatter={(val: number) => `$${val.toFixed(6)}`}
                     />
-                    <Tooltip content={<CustomTooltip formatter={(val: number) => `$${val.toFixed(2)}`} />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val.toFixed(6)}`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -714,8 +715,8 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Area type="monotone" dataKey="avgLatency" stroke="#3b82f6" fillOpacity={0.8} fill="url(#colorLatency)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -748,7 +749,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={formatPercentage} />} />
                     <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                     <Area type="monotone" dataKey="errorRate" stroke="#ef4444" fillOpacity={0.8} fill="url(#colorErrorRate)" />
@@ -788,7 +789,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       tickLine={false}
                       domain={['dataMin - 1', 'dataMax + 10']}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -827,7 +828,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -877,8 +878,9 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
                       tickLine={false}
+                      tickFormatter={(val: number) => `$${val.toFixed(6)}`}
                     />
-                    <Tooltip content={<CustomTooltip formatter={(val: number) => `$${val.toFixed(2)}`} />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val.toFixed(6)}`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -908,8 +910,8 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Area type="monotone" dataKey="avgLatency" stroke="#3b82f6" fillOpacity={0.8} fill="url(#colorLatency)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -940,7 +942,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={formatPercentage} />} />
                     <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                     <Area type="monotone" dataKey="errorRate" stroke="#ef4444" fillOpacity={0.8} fill="url(#colorErrorRate2)" />
@@ -1067,7 +1069,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(val: number) => `$${val.toFixed(4)}`} />
+                          <Tooltip formatter={(val: number) => `${val.toFixed(6)}`} />
                           <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                         </PieChart>
                       </ResponsiveContainer>
@@ -1092,7 +1094,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                         <BarChart data={generateUsagePatternsData()}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                           <XAxis dataKey="hour" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                          <YAxis tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
+                          <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                           <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(99, 102, 241, 0.1)'}} />
                           <Bar dataKey="requests" fill="#6366f1" radius={[4, 4, 0, 0]} />
                         </BarChart>
@@ -1109,7 +1111,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                           <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} axisLine={false} tickLine={false} />
                           <YAxis tick={{fontSize: 9, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                          <Tooltip content={<CustomTooltip />} />
+                          <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                           <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                           {getTopModelsForChart().map((model) => (
                             <Line
@@ -1178,7 +1180,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                           <XAxis dataKey="time" stroke="#9CA3AF" />
                           <YAxis stroke="#9CA3AF" />
-                          <Tooltip content={<CustomTooltip />} />
+                          <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                           <Legend />
                           {getProvidersForChart().map((provider) => (
                             <Line
