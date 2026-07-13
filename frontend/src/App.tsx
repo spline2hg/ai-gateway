@@ -27,18 +27,18 @@ function ProtectedRoute({ children, loading, error }: { children: React.ReactNod
     const fact = LOADING_FACTS[factIndex];
     const FactIcon = fact.icon;
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+      <div className="min-h-screen bg-[#040506] text-[#e6e6e6] font-sans flex items-center justify-center">
         <div className="flex flex-col items-center gap-6 max-w-md text-center px-6">
-          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-            <Loader2 size={24} className="text-gray-400 dark:text-gray-600 animate-spin" />
+          <div className="w-12 h-12 rounded-full key-card flex items-center justify-center">
+            <Loader2 size={24} className="text-[#454647] animate-spin" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Connecting to backend</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Starting up AI Gateway services...</p>
+            <h2 className="text-[18px] font-semibold text-white mb-1">Connecting to backend</h2>
+            <p className="text-[14px] text-[#6a6b6c]">Starting up AI Gateway services...</p>
           </div>
-          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 w-full">
-            <FactIcon size={18} className="text-gray-400 dark:text-gray-500 shrink-0" />
-            <span className="text-xs text-gray-600 dark:text-gray-400 text-left">{fact.text}</span>
+          <div className="flex items-center gap-3 key-card p-4 w-full">
+            <FactIcon size={18} className="text-[#454647] shrink-0" />
+            <span className="text-[12px] text-[#9c9c9d] text-left">{fact.text}</span>
           </div>
         </div>
       </div>
@@ -47,10 +47,10 @@ function ProtectedRoute({ children, loading, error }: { children: React.ReactNod
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+      <div className="min-h-screen bg-[#040506] text-[#e6e6e6] font-sans flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
-          <span className="text-gray-500 dark:text-gray-400 text-sm">Setting up your identity...</span>
+          <Loader2 size={32} className="text-[#454647] animate-spin" />
+          <span className="text-[#6a6b6c] text-[14px]">Setting up your identity...</span>
         </div>
       </div>
     );
@@ -58,10 +58,10 @@ function ProtectedRoute({ children, loading, error }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+      <div className="min-h-screen bg-[#040506] text-[#e6e6e6] font-sans flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 size={32} className="text-gray-400 dark:text-gray-600 animate-spin" />
-          <span className="text-gray-500 dark:text-gray-400 text-sm">Loading gateways...</span>
+          <Loader2 size={32} className="text-[#454647] animate-spin" />
+          <span className="text-[#6a6b6c] text-[14px]">Loading gateways...</span>
         </div>
       </div>
     );
@@ -69,18 +69,18 @@ function ProtectedRoute({ children, loading, error }: { children: React.ReactNod
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans flex items-center justify-center">
+      <div className="min-h-screen bg-[#040506] text-[#e6e6e6] font-sans flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 max-w-sm text-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-            <span className="text-red-500 dark:text-red-400 text-lg">!</span>
+          <div className="w-12 h-12 rounded-full bg-coral-400/10 flex items-center justify-center">
+            <span className="text-coral-400 text-[18px]">!</span>
           </div>
           <div>
-            <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Something went wrong</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{error}</p>
+            <h2 className="text-[14px] font-medium text-white mb-1">Something went wrong</h2>
+            <p className="text-[12px] text-[#6a6b6c]">{error}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+            className="btn-fill px-4 py-2 text-[13px]"
           >
             Retry
           </button>
@@ -94,7 +94,7 @@ function ProtectedRoute({ children, loading, error }: { children: React.ReactNod
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 font-sans selection:bg-gray-200 dark:selection:bg-gray-800 selection:text-gray-900 dark:selection:text-white">
+    <div className="min-h-screen bg-[#040506] text-[#e6e6e6] font-sans selection:bg-coral-400/15 selection:text-white">
       <Navbar />
       <main className="pt-20">{children}</main>
     </div>
@@ -326,40 +326,40 @@ function App() {
       </Routes>
 
       {showCredentialsModal && newGatewayCredentials && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => { setShowCredentialsModal(false); setNewGatewayCredentials(null); setCopiedId(false); setCopiedSecret(false); }}>
-          <div className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg w-full max-w-md shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Gateway Created Successfully!</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => { setShowCredentialsModal(false); setNewGatewayCredentials(null); setCopiedId(false); setCopiedSecret(false); }}>
+          <div className="key-card w-full max-w-md shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-[#1b1c1e] flex justify-between items-center">
+              <h2 className="text-[14px] font-semibold text-white">Gateway Created Successfully!</h2>
             </div>
             <div className="p-6">
               <div className="mb-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-[14px] text-[#9c9c9d] mb-4">
                   Save these credentials securely. You'll need them to make API requests.
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">Gateway ID</label>
+                    <label className="block text-[12px] font-medium text-[#9c9c9d] mb-2">Gateway ID</label>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-md p-2.5 text-xs text-gray-900 dark:text-white font-mono break-all">
+                      <code className="flex-1 inset-input p-2.5 text-[12px] text-white font-mono break-all">
                         {newGatewayCredentials.id}
                       </code>
                       <button
                         onClick={() => copyToClipboard(newGatewayCredentials.id, 'id')}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors border border-gray-300 dark:border-gray-800 rounded-md hover:border-gray-400 dark:hover:border-gray-600"
+                        className="p-2 text-[#9c9c9d] hover:text-white transition-colors border border-[#363739] rounded-[8px] hover:border-[#454647]"
                       >
                         {copiedId ? <Check size={14} /> : <Copy size={14} />}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-2">Secret Key</label>
+                    <label className="block text-[12px] font-medium text-[#9c9c9d] mb-2">Secret Key</label>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-md p-2.5 text-xs text-gray-900 dark:text-white font-mono break-all">
+                      <code className="flex-1 inset-input p-2.5 text-[12px] text-white font-mono break-all">
                         {newGatewayCredentials.secret}
                       </code>
                       <button
                         onClick={() => copyToClipboard(newGatewayCredentials.secret, 'secret')}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors border border-gray-300 dark:border-gray-800 rounded-md hover:border-gray-400 dark:hover:border-gray-600"
+                        className="p-2 text-[#9c9c9d] hover:text-white transition-colors border border-[#363739] rounded-[8px] hover:border-[#454647]"
                       >
                         {copiedSecret ? <Check size={14} /> : <Copy size={14} />}
                       </button>
@@ -375,7 +375,7 @@ function App() {
                     setCopiedId(false);
                     setCopiedSecret(false);
                   }}
-                  className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 rounded-md text-xs font-medium transition-colors"
+                  className="btn-fill px-4 py-2 text-[13px]"
                 >
                   I've Saved My Credentials
                 </button>

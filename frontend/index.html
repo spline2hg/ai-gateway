@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AI Gateway</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -15,39 +15,47 @@
           extend: {
             colors: {
               gray: {
-                50: '#fafafa',
-                100: '#f4f4f5',
-                200: '#e4e4e7',
-                300: '#d4d4d8',
-                400: '#a1a1aa',
-                500: '#71717a',
-                600: '#52525b',
-                700: '#3f3f46',
-                800: '#27272a',
-                900: '#18181b',
-                950: '#09090b',
+                50: '#ffffff',
+                100: '#fafafa',
+                200: '#f5f5f5',
+                300: '#e6e6e6',
+                400: '#9c9c9d',
+                500: '#6a6b6c',
+                600: '#454647',
+                700: '#2f3031',
+                800: '#363739',
+                900: '#07080a',
+                950: '#040506',
               },
               border: {
-                DEFAULT: '#e4e4e7',
-                dark: '#27272a',
+                DEFAULT: '#363739',
+                dark: '#363739',
               },
               input: {
-                DEFAULT: '#f4f4f5',
-                dark: '#27272a',
+                DEFAULT: '#111214',
+                dark: '#111214',
               },
-              ring: '#d4d4d8',
-              background: {
-                DEFAULT: '#fafafa',
-                dark: '#09090b',
+              ring: '#363739',
+              background: { DEFAULT: '#040506', dark: '#040506' },
+              foreground: { DEFAULT: '#ffffff', dark: '#ffffff' },
+              coral: {
+                DEFAULT: '#ff6363',
+                50: '#fff5f5',
+                100: '#ffe0e0',
+                200: '#ffb8b8',
+                300: '#ff8a8a',
+                400: '#ff6363',
+                500: '#ff4a4a',
+                600: '#e63030',
+                700: '#b82828',
+                800: '#452324',
+                900: '#2d1516',
               },
-              foreground: {
-                DEFAULT: '#09090b',
-                dark: '#fafafa',
-              },
+              ember: '#452324',
             },
             fontFamily: {
-              mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
-              sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', "Segoe UI", 'Roboto', "Helvetica Neue", 'Arial', "Noto Sans", 'sans-serif'],
+              mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
             },
             animation: {
               'fade-in': 'fadeIn 0.3s ease-out',
@@ -69,23 +77,16 @@
     </script>
     <style>
       html {
-        color-scheme: light;
-      }
-
-      html.dark {
         color-scheme: dark;
+        background-color: #040506;
       }
 
       body {
-        background-color: #fafafa;
-        color: #09090b;
+        background-color: #040506;
+        color: #e6e6e6;
         font-family: 'Inter', sans-serif;
-        transition: background-color 0.3s ease, color 0.3s ease;
-      }
-
-      html.dark body {
-        background-color: #09090b;
-        color: #e4e4e7;
+        font-feature-settings: 'cv11', 'ss03';
+        -webkit-font-smoothing: antialiased;
       }
 
       ::-webkit-scrollbar {
@@ -93,34 +94,88 @@
         height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: transparent; 
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #d4d4d8;
+        background: #1b1c1e;
         border-radius: 3px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1aa; 
+        background: #2f3031;
       }
 
-      html.dark ::-webkit-scrollbar-thumb {
-        background: #27272a;
-      }
-      html.dark ::-webkit-scrollbar-thumb:hover {
-        background: #3f3f46;
+      ::selection {
+        background: rgba(255, 99, 99, 0.15);
+        color: #ffffff;
       }
 
       .glass-panel {
-        background: rgba(250, 250, 250, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(9, 9, 11, 0.08);
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        background: rgba(4, 5, 6, 0.7);
+        backdrop-filter: blur(48px);
+        -webkit-backdrop-filter: blur(48px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       }
 
-      html.dark .glass-panel {
-        background: rgba(9, 9, 11, 0.6);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      .glass-nav {
+        background: rgba(7, 8, 10, 0.72);
+        backdrop-filter: blur(48px);
+        -webkit-backdrop-filter: blur(48px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 9999px;
+      }
+
+      .key-card {
+        background: #07080a;
+        border-radius: 16px;
+        box-shadow:
+          rgba(255, 255, 255, 0.04) 0px 1px 0px 0px inset,
+          rgba(255, 255, 255, 0.08) 0px 0px 0px 1px,
+          rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+      }
+
+      .key-card-hover {
+        transition: box-shadow 0.2s ease;
+      }
+      .key-card-hover:hover {
+        box-shadow:
+          rgba(255, 255, 255, 0.06) 0px 1px 0px 0px inset,
+          rgba(255, 255, 255, 0.12) 0px 0px 0px 1px,
+          rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+      }
+
+      .edge-card {
+        background: transparent;
+        border: 1px solid #363739;
+        border-radius: 16px;
+      }
+
+      .inset-input {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid #363739;
+        border-radius: 8px;
+        color: #ffffff;
+      }
+      .inset-input:focus {
+        border-color: #454647;
+        outline: none;
+      }
+      .inset-input::placeholder {
+        color: #6a6b6c;
+      }
+
+      .btn-fill {
+        background: #e6e6e6;
+        color: #454647;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background 0.15s ease;
+      }
+      .btn-fill:hover {
+        background: #ffffff;
+      }
+      .btn-fill:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
       }
 
       .no-scrollbar::-webkit-scrollbar {

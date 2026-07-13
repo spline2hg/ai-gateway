@@ -103,6 +103,7 @@ async def get_gateway_analytics(
             func.sum(RequestAnalytics.tokens_prompt).label("tokens_in"),
             func.sum(RequestAnalytics.tokens_completion).label("tokens_out"),
             func.sum(RequestAnalytics.cost).label("cost"),
+            func.avg(RequestAnalytics.latency).label("avg_latency"),
             func.sum(case((RequestAnalytics.status.is_(False), 1), else_=0)).label("errors"),
         ).group_by(func.date(RequestAnalytics.timestamp)).order_by(text("day")).all()
 
@@ -113,6 +114,7 @@ async def get_gateway_analytics(
                 "tokens_in": dr.tokens_in or 0,
                 "tokens_out": dr.tokens_out or 0,
                 "cost": safe_float(dr.cost),
+                "avg_latency": safe_float(dr.avg_latency),
                 "errors": dr.errors,
                 "success_rate": round(((dr.requests - dr.errors) / dr.requests) * 100, 2),
             }

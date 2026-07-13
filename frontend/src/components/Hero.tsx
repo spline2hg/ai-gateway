@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import GatewayFlow from './GatewayFlow';
 
 interface HeroProps {
@@ -7,39 +8,45 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ onEnter }) => {
+  const navigate = useNavigate();
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-24 px-6 overflow-hidden min-h-screen flex flex-col justify-center">
-      
-      <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10 w-full">
-        
-        {/* Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter mb-8 max-w-5xl mx-auto leading-[0.9] animate-fade-in-up text-white" style={{ animationDelay: '0.2s' }}>
-          API Gateway <br /> for LLMs
-        </h1>
+    <>
+      {/* Centered hero */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+        <div className="flex flex-col items-center text-center relative z-10 w-full">
+          <h1 className="text-[44px] md:text-[56px] lg:text-[64px] font-semibold tracking-tight mb-6 max-w-3xl mx-auto leading-[0.95] animate-fade-in text-white">
+            API Gateway<br /> for LLMs
+          </h1>
 
-        {/* Subhead */}
-        <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed font-light animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-          Route requests across 300+ LLMs with a single API. Track costs, latency, and usage in real-time with full observability.
-        </p>
+          <p className="text-[16px] md:text-[18px] text-[#9c9c9d] max-w-[520px] mx-auto mb-10 leading-[1.5] font-normal animate-fade-in">
+            Route requests across 300+ LLMs with a single API. Track costs, latency, and usage in real-time with full observability.
+          </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-16 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <button onClick={onEnter} className="h-12 px-8 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-            Open Dashboard
-            <ArrowRight size={14} className="text-black" />
-          </button>
-          <button className="h-12 px-8 rounded-full bg-black border border-white/15 text-white text-sm font-medium hover:bg-white/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2 backdrop-blur-sm">
-            View API Docs
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-3 animate-fade-in">
+            <button
+              onClick={onEnter}
+              className="btn-fill h-11 px-6 text-[13px] flex items-center gap-2 font-medium"
+            >
+              Open Dashboard
+              <ArrowRight size={14} />
+            </button>
+            <button
+              onClick={() => navigate('/models')}
+              className="h-11 px-6 rounded-[8px] border border-[#363739] text-[#9c9c9d] text-[13px] font-medium hover:text-white hover:border-[#454647] transition-all flex items-center gap-2"
+            >
+              View Model List
+            </button>
+          </div>
         </div>
+      </section>
 
-        {/* Main Visualization */}
-        <div className="w-full relative animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-           <GatewayFlow />
+      {/* Flow visualization — below the fold */}
+      <section className="relative px-6 pb-20">
+        <div className="max-w-[1200px] mx-auto">
+          <GatewayFlow />
         </div>
-
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

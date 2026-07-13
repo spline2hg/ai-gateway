@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Gateway, LogEntry } from '../types';
-import { Settings, LayoutDashboard, ScrollText, BarChart3, Terminal } from 'lucide-react';
 import GatewayOverview from './GatewayOverview';
 import GatewayLogs from './GatewayLogs';
 import GatewayAnalytics from './GatewayAnalytics';
@@ -31,41 +30,36 @@ const GatewayView: React.FC<GatewayViewProps> = ({ gateway, logs, onBack, onNewL
 
   return (
     <div className="flex flex-col h-[calc(100vh-56px)]">
-      
-      {/* Header & Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 backdrop-blur-sm z-10">
-        <div className="max-w-7xl mx-auto px-6">
-           <div className="pt-8 pb-1">
-              {/* Tab Navigation */}
-               <div className="flex gap-6 overflow-x-auto no-scrollbar">
-                {tabs.map(tab => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`
-                        relative pb-3 text-sm font-medium transition-colors
-                        ${isActive 
-                          ? 'text-gray-900 dark:text-white' 
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'}
-                      `}
-                    >
-                      {tab.label}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 dark:bg-white rounded-t-full"></span>
-                      )}
-                    </button>
-                  )
-                })}
-               </div>
-            </div>
-         </div>
-       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-auto bg-white dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto p-6 h-full animate-fade-in">
+      {/* Tabs */}
+      <div className="border-b border-[#1b1c1e] bg-[#07080a]/80 backdrop-blur-sm z-10">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="pt-6 pb-0">
+            <div className="flex gap-1 overflow-x-auto no-scrollbar">
+              {tabs.map(tab => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative px-4 py-2.5 text-[13px] font-medium rounded-[8px] transition-colors ${
+                      isActive
+                        ? 'text-white bg-white/[0.06]'
+                        : 'text-[#9c9c9d] hover:text-white hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-[1200px] mx-auto p-6 h-full animate-fade-in">
           {activeTab === 'overview' && <GatewayOverview gateway={gateway} logs={filteredLogs} />}
           {activeTab === 'logs' && <GatewayLogs gatewayId={gateway.id} />}
           {activeTab === 'analytics' && <GatewayAnalytics gatewayId={gateway.id} logs={[]} />}

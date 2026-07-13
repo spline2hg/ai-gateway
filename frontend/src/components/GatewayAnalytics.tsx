@@ -47,14 +47,13 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
 
    // Detect if dark mode is active
    const { theme } = useTheme();
-   const isDark = theme === 'dark';
+   const isDark = true;
 
-  // Chart color palette based on theme
   const chartColors = {
-    grid: isDark ? '#27272a' : '#e5e7eb',
-    axis: isDark ? '#71717a' : '#6b7280',
-    line: isDark ? '#9CA3AF' : '#6b7280',
-    text: isDark ? '#71717a' : '#6b7280',
+    grid: '#1b1c1e',
+    axis: '#6a6b6c',
+    line: '#363739',
+    text: '#6a6b6c',
   };
 
   // Time range options
@@ -198,7 +197,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
   
   
   // Color palette for charts
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#14b8a6', '#f97316'];
+  const COLORS = ['#ff6363', '#59d499', '#56c2ff', '#e6e6e6', '#9c9c9d', '#454647', '#6a6b6c', '#ff8a8a'];
 
   // Real model performance data from API
   const generateModelPerformanceData = () => {
@@ -258,21 +257,19 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
 
   // Real latency data from API (summary level since daily latency data not available)
   const generateLatencyTrendsData = () => {
-    // Since API doesn't provide daily latency breakdown, use summary data
-    const avgLatency = analyticsData?.summary?.avg_latency || 0;
-
     if (!analyticsData?.daily_stats) return [];
 
-    // Use all data returned by API - it should already be filtered by time range
     const filteredData = analyticsData.daily_stats || [];
 
-    // Return the same average latency for each time period for consistency
-    return filteredData.map(stat => ({
-      time: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      avgLatency: avgLatency,
-      p50Latency: Math.round(avgLatency * 0.8), // Estimate based on avg
-      p95Latency: Math.round(avgLatency * 2.2)  // Estimate based on avg
-    }));
+    return filteredData.map(stat => {
+      const avg = stat.avg_latency || 0;
+      return {
+        time: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        avgLatency: Math.round(avg * 10) / 10,
+        p50Latency: Math.round(avg * 0.8 * 10) / 10,
+        p95Latency: Math.round(avg * 2.2 * 10) / 10,
+      };
+    });
   };
 
   // Real error analysis data from API
@@ -591,21 +588,21 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                      tickLine={false}
                      domain={['dataMin - 1', 'dataMax + 10']}
                    />
-                   <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
-                   <Legend />
-                   <Line
-                     type="monotone"
-                     dataKey="requests"
-                     stroke={isDark ? '#FFFFFF' : '#3b82f6'}
-                     strokeWidth={2}
-                     name="Total Requests"
-                     dot={{ fill: isDark ? '#FFFFFF' : '#3b82f6', r: 3 }}
-                     activeDot={{ r: 5 }}
-                   />
-                   </LineChart>
-                   </ResponsiveContainer>
-                   </div>
-                   </div>
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}`} />} />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="requests"
+                      stroke={isDark ? '#FFFFFF' : '#3b82f6'}
+                      strokeWidth={2}
+                      name="Total Requests"
+                      dot={{ fill: isDark ? '#FFFFFF' : '#3b82f6', r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                    </LineChart>
+                    </ResponsiveContainer>
+                    </div>
+                    </div>
 
           {/* Second Row: Input/Output Tokens and Cost */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -632,7 +629,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -789,7 +786,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       tickLine={false}
                       domain={['dataMin - 1', 'dataMax + 10']}
                     />
-                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}`} />} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -828,7 +825,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
+                    <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}`} />} />
                     <Legend />
                     <Line
                       type="monotone"
