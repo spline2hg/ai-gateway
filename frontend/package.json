@@ -13,11 +13,14 @@
     "openai": "^6.10.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-globe.gl": "^2.38.0",
     "react-router-dom": "^7.17.0",
-    "recharts": "^3.5.1"
+    "recharts": "^3.5.1",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
