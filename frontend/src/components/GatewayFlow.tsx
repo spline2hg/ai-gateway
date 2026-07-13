@@ -194,25 +194,25 @@ const GatewayFlow: React.FC = () => {
           </div>
         </div>
 
-        {/* Provider 2 (Mid) - Anthropic */}
+        {/* Provider 2 (Mid) - DeepSeek */}
         <div className="absolute left-[87.5%] top-[50%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
-          <div className={`w-12 h-12 rounded-xl bg-[#0A0A0A] border transition-all duration-300 flex items-center justify-center shadow-lg ${phase >= 3 && targetProvider === 1 ? 'border-purple-400 node-glow scale-110' : 'border-white/10'}`}>
-             <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border transition-colors duration-300 ${phase >= 3 && targetProvider === 1 ? 'bg-purple-500 text-black border-purple-400' : 'bg-purple-900/20 text-purple-700 border-purple-900/30'}`}>A</div>
+          <div className={`w-12 h-12 rounded-xl bg-[#0A0A0A] border transition-all duration-300 flex items-center justify-center shadow-lg ${phase >= 3 && targetProvider === 1 ? 'border-blue-400 node-glow scale-110' : 'border-white/10'}`}>
+             <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border transition-colors duration-300 ${phase >= 3 && targetProvider === 1 ? 'bg-blue-500 text-black border-blue-400' : 'bg-blue-900/20 text-blue-700 border-blue-900/30'}`}>D</div>
           </div>
           <div className={`hidden md:flex flex-col transition-opacity duration-300 ${phase >= 3 && targetProvider === 1 ? 'opacity-100' : 'opacity-40'}`}>
-              <span className="text-xs font-semibold text-white/90">Anthropic</span>
-              <span className="text-[10px] text-white/40 font-mono">claude-opus</span>
+              <span className="text-xs font-semibold text-white/90">DeepSeek</span>
+              <span className="text-[10px] text-white/40 font-mono">deepseek-chat</span>
           </div>
         </div>
 
-        {/* Provider 3 (Bot) - Mistral */}
+        {/* Provider 3 (Bot) - Anthropic */}
         <div className="absolute left-[87.5%] top-[75%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
-          <div className={`w-12 h-12 rounded-xl bg-[#0A0A0A] border transition-all duration-300 flex items-center justify-center shadow-lg ${phase >= 3 && targetProvider === 2 ? 'border-orange-400 node-glow scale-110' : 'border-white/10'}`}>
-             <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border transition-colors duration-300 ${phase >= 3 && targetProvider === 2 ? 'bg-orange-500 text-black border-orange-400' : 'bg-orange-900/20 text-orange-700 border-orange-900/30'}`}>M</div>
+          <div className={`w-12 h-12 rounded-xl bg-[#0A0A0A] border transition-all duration-300 flex items-center justify-center shadow-lg ${phase >= 3 && targetProvider === 2 ? 'border-purple-400 node-glow scale-110' : 'border-white/10'}`}>
+             <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border transition-colors duration-300 ${phase >= 3 && targetProvider === 2 ? 'bg-purple-500 text-black border-purple-400' : 'bg-purple-900/20 text-purple-700 border-purple-900/30'}`}>A</div>
           </div>
           <div className={`hidden md:flex flex-col transition-opacity duration-300 ${phase >= 3 && targetProvider === 2 ? 'opacity-100' : 'opacity-40'}`}>
-              <span className="text-xs font-semibold text-white/90">Mistral</span>
-              <span className="text-[10px] text-white/40 font-mono">large-latest</span>
+              <span className="text-xs font-semibold text-white/90">Anthropic</span>
+              <span className="text-[10px] text-white/40 font-mono">claude-opus</span>
           </div>
         </div>
 

@@ -1,0 +1,375 @@
+{
+    "gateway_id": "67ee1b02-0c82-46aa-9880-b0e52dcd8f89",
+    "date_range": {
+        "start_date": "2026-06-13T18:54:51.215067+00:00",
+        "end_date": "2026-07-13T18:54:51.215067+00:00",
+        "days": 30
+    },
+    "summary": {
+        "total_requests": 300,
+        "tokens_in": 122129,
+        "tokens_out": 73216,
+        "total_tokens": 195345,
+        "total_cost": 0.283528,
+        "avg_latency": 3.4285143884892086,
+        "min_latency": 0.52,
+        "max_latency": 5.977,
+        "error_count": 22,
+        "error_rate": 7.33,
+        "success_rate": 92.67
+    },
+    "model_breakdown": {
+        "gpt-4o": {
+            "requests": 55,
+            "tokens_in": 21770,
+            "tokens_out": 12508,
+            "total_tokens": 34278,
+            "cost": 0.179501,
+            "avg_latency": 3.4119423076923074
+        },
+        "mimo-v2-flash": {
+            "requests": 68,
+            "tokens_in": 28377,
+            "tokens_out": 17195,
+            "total_tokens": 45572,
+            "cost": 0.004391,
+            "avg_latency": 3.256806451612903
+        },
+        "mimo-v2-pro": {
+            "requests": 46,
+            "tokens_in": 18945,
+            "tokens_out": 10775,
+            "total_tokens": 29720,
+            "cost": 0.021711,
+            "avg_latency": 3.577363636363636
+        },
+        "mimo-v2.5": {
+            "requests": 71,
+            "tokens_in": 25022,
+            "tokens_out": 14624,
+            "total_tokens": 39646,
+            "cost": 0.0075970000000000005,
+            "avg_latency": 3.504666666666667
+        },
+        "mimo-v2.5-pro": {
+            "requests": 60,
+            "tokens_in": 28015,
+            "tokens_out": 18114,
+            "total_tokens": 46129,
+            "cost": 0.070328,
+            "avg_latency": 3.4313333333333333
+        }
+    },
+    "daily_stats": [
+        {
+            "date": "2026-06-13",
+            "requests": 2,
+            "tokens_in": 490,
+            "tokens_out": 151,
+            "cost": 5.4999999999999995e-05,
+            "avg_latency": 3.8385,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-14",
+            "requests": 9,
+            "tokens_in": 2677,
+            "tokens_out": 2036,
+            "cost": 0.011553,
+            "avg_latency": 2.8724285714285713,
+            "errors": 2,
+            "success_rate": 77.78
+        },
+        {
+            "date": "2026-06-15",
+            "requests": 12,
+            "tokens_in": 5738,
+            "tokens_out": 2924,
+            "cost": 0.016196,
+            "avg_latency": 3.4130000000000003,
+            "errors": 2,
+            "success_rate": 83.33
+        },
+        {
+            "date": "2026-06-16",
+            "requests": 6,
+            "tokens_in": 2527,
+            "tokens_out": 834,
+            "cost": 0.004332,
+            "avg_latency": 2.6128,
+            "errors": 1,
+            "success_rate": 83.33
+        },
+        {
+            "date": "2026-06-17",
+            "requests": 12,
+            "tokens_in": 4200,
+            "tokens_out": 2266,
+            "cost": 0.009094,
+            "avg_latency": 3.9788181818181814,
+            "errors": 1,
+            "success_rate": 91.67
+        },
+        {
+            "date": "2026-06-18",
+            "requests": 10,
+            "tokens_in": 4902,
+            "tokens_out": 2590,
+            "cost": 0.002623,
+            "avg_latency": 2.7462222222222223,
+            "errors": 1,
+            "success_rate": 90.0
+        },
+        {
+            "date": "2026-06-19",
+            "requests": 13,
+            "tokens_in": 6049,
+            "tokens_out": 2841,
+            "cost": 0.009492,
+            "avg_latency": 3.648615384615385,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-20",
+            "requests": 12,
+            "tokens_in": 4120,
+            "tokens_out": 3580,
+            "cost": 0.017489,
+            "avg_latency": 3.1790833333333333,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-21",
+            "requests": 9,
+            "tokens_in": 4077,
+            "tokens_out": 2161,
+            "cost": 0.016904,
+            "avg_latency": 3.37675,
+            "errors": 1,
+            "success_rate": 88.89
+        },
+        {
+            "date": "2026-06-22",
+            "requests": 8,
+            "tokens_in": 1647,
+            "tokens_out": 1749,
+            "cost": 0.00843,
+            "avg_latency": 4.557571428571428,
+            "errors": 1,
+            "success_rate": 87.5
+        },
+        {
+            "date": "2026-06-23",
+            "requests": 11,
+            "tokens_in": 4759,
+            "tokens_out": 3290,
+            "cost": 0.003766,
+            "avg_latency": 3.7546363636363638,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-24",
+            "requests": 12,
+            "tokens_in": 4673,
+            "tokens_out": 3832,
+            "cost": 0.008744,
+            "avg_latency": 3.462090909090909,
+            "errors": 1,
+            "success_rate": 91.67
+        },
+        {
+            "date": "2026-06-25",
+            "requests": 10,
+            "tokens_in": 4170,
+            "tokens_out": 1954,
+            "cost": 0.010353,
+            "avg_latency": 3.263888888888889,
+            "errors": 1,
+            "success_rate": 90.0
+        },
+        {
+            "date": "2026-06-26",
+            "requests": 12,
+            "tokens_in": 4717,
+            "tokens_out": 3847,
+            "cost": 0.007814999999999999,
+            "avg_latency": 2.9183333333333334,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-27",
+            "requests": 8,
+            "tokens_in": 3053,
+            "tokens_out": 1750,
+            "cost": 0.010124000000000001,
+            "avg_latency": 2.73575,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-06-28",
+            "requests": 13,
+            "tokens_in": 5062,
+            "tokens_out": 3695,
+            "cost": 0.015035,
+            "avg_latency": 3.488909090909091,
+            "errors": 2,
+            "success_rate": 84.62
+        },
+        {
+            "date": "2026-06-29",
+            "requests": 13,
+            "tokens_in": 5738,
+            "tokens_out": 2589,
+            "cost": 0.006225,
+            "avg_latency": 3.7870833333333334,
+            "errors": 1,
+            "success_rate": 92.31
+        },
+        {
+            "date": "2026-06-30",
+            "requests": 11,
+            "tokens_in": 2903,
+            "tokens_out": 1974,
+            "cost": 0.006349,
+            "avg_latency": 2.7334444444444443,
+            "errors": 2,
+            "success_rate": 81.82
+        },
+        {
+            "date": "2026-07-01",
+            "requests": 5,
+            "tokens_in": 1351,
+            "tokens_out": 1194,
+            "cost": 0.000382,
+            "avg_latency": 2.4844,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-02",
+            "requests": 6,
+            "tokens_in": 2799,
+            "tokens_out": 1450,
+            "cost": 0.0062369999999999995,
+            "avg_latency": 3.5515000000000003,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-03",
+            "requests": 15,
+            "tokens_in": 5366,
+            "tokens_out": 3669,
+            "cost": 0.018191,
+            "avg_latency": 3.749,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-04",
+            "requests": 9,
+            "tokens_in": 3622,
+            "tokens_out": 2769,
+            "cost": 0.0066960000000000006,
+            "avg_latency": 3.7995,
+            "errors": 1,
+            "success_rate": 88.89
+        },
+        {
+            "date": "2026-07-05",
+            "requests": 13,
+            "tokens_in": 5674,
+            "tokens_out": 4317,
+            "cost": 0.025562,
+            "avg_latency": 4.230615384615384,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-06",
+            "requests": 9,
+            "tokens_in": 4295,
+            "tokens_out": 1630,
+            "cost": 0.009172,
+            "avg_latency": 3.415777777777778,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-07",
+            "requests": 9,
+            "tokens_in": 3243,
+            "tokens_out": 1299,
+            "cost": 0.008028,
+            "avg_latency": 2.920375,
+            "errors": 1,
+            "success_rate": 88.89
+        },
+        {
+            "date": "2026-07-08",
+            "requests": 19,
+            "tokens_in": 8540,
+            "tokens_out": 4154,
+            "cost": 0.013485,
+            "avg_latency": 2.9671764705882353,
+            "errors": 2,
+            "success_rate": 89.47
+        },
+        {
+            "date": "2026-07-09",
+            "requests": 6,
+            "tokens_in": 3361,
+            "tokens_out": 1594,
+            "cost": 0.011130000000000001,
+            "avg_latency": 2.935,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-10",
+            "requests": 4,
+            "tokens_in": 2466,
+            "tokens_out": 1244,
+            "cost": 0.001474,
+            "avg_latency": 4.13725,
+            "errors": 0,
+            "success_rate": 100.0
+        },
+        {
+            "date": "2026-07-11",
+            "requests": 7,
+            "tokens_in": 2523,
+            "tokens_out": 2025,
+            "cost": 0.003227,
+            "avg_latency": 4.2491666666666665,
+            "errors": 1,
+            "success_rate": 85.71
+        },
+        {
+            "date": "2026-07-12",
+            "requests": 10,
+            "tokens_in": 5147,
+            "tokens_out": 2425,
+            "cost": 0.013296,
+            "avg_latency": 3.590888888888889,
+            "errors": 1,
+            "success_rate": 90.0
+        },
+        {
+            "date": "2026-07-13",
+            "requests": 5,
+            "tokens_in": 2240,
+            "tokens_out": 1383,
+            "cost": 0.002069,
+            "avg_latency": 3.84,
+            "errors": 0,
+            "success_rate": 100.0
+        }
+    ]
+}

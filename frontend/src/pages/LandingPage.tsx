@@ -4,6 +4,7 @@ import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Footer from '../components/Footer';
 import BackgroundBeams from '../components/BackgroundBeams';
+import LandingAnalytics from '../components/LandingAnalytics';
 
 interface LandingPageProps {
   onEnter?: () => void;
@@ -17,6 +18,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
         <Navbar />
         <main>
           <Hero onEnter={onEnter} />
+          <LandingAnalytics />
           <Features />
         </main>
         <Footer />

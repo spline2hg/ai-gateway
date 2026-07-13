@@ -8,6 +8,8 @@ import { useTheme } from '../context/ThemeContext';
 interface GatewayAnalyticsProps {
   gatewayId: string;
   logs: LogEntry[];
+  hideControls?: boolean;
+  staticData?: any;
 }
 
 const CustomTooltip = ({ active, payload, label, formatter }: any) => {
@@ -36,7 +38,7 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   return null;
 };
 
-const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs }) => {
+const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs, hideControls = false, staticData }) => {
    const [analyticsData, setAnalyticsData] = useState<any>(null);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
@@ -65,6 +67,12 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
 
   // Fetch real analytics data when component mounts or time range changes
   useEffect(() => {
+    if (staticData) {
+      setAnalyticsData(staticData);
+      setLoading(false);
+      return;
+    }
+
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
@@ -91,7 +99,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
     };
 
     fetchAnalytics();
-  }, [gatewayId, timeRange]);
+  }, [gatewayId, timeRange, staticData]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -477,7 +485,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
     <div className="space-y-6">
 
       {/* Header with Time Range Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 ${hideControls ? 'hidden' : ''}`}>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Overview</h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
@@ -486,6 +494,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
         </div>
 
         {/* Controls Container */}
+        {!hideControls && (
         <div className="flex items-center gap-3">
           {/* Time Range Dropdown */}
           <div className="relative time-range-dropdown">
@@ -559,20 +568,21 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
             <span>Advanced Analytics</span>
           </button>
         </div>
+        )}
       </div>
 
       {layoutMode === 'single' ? (
         // Single Column Layout
         <>
           {/* Full Width Requests Chart */}
-          <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+          <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Number of Requests</h3>
               <p className="text-sm text-gray-500">Total API requests over the selected time period</p>
             </div>
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={requestsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <LineChart data={requestsData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                    <XAxis
                      dataKey="time"
@@ -581,13 +591,13 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                      axisLine={false}
                      tickLine={false}
                    />
-                   <YAxis
-                     stroke={chartColors.line}
-                     tick={{fontSize: 11, fill: chartColors.text}}
-                     axisLine={false}
-                     tickLine={false}
-                     domain={['dataMin - 1', 'dataMax + 10']}
-                   />
+                    <YAxis width={35}
+                      stroke={chartColors.line}
+                      tick={{fontSize: 11, fill: chartColors.text}}
+                      axisLine={false}
+                      tickLine={false}
+                      domain={['dataMin - 1', 'dataMax + 10']}
+                    />
                     <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}`} />} />
                     <Legend />
                     <Line
@@ -607,7 +617,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
           {/* Second Row: Input/Output Tokens and Cost */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Input/Output Tokens */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6">
                 <h3 className="text-white text-sm font-medium">Input/Output Tokens</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-500">Token consumption over the selected time period</p>
@@ -623,7 +633,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
+                    <YAxis width={35}
                       stroke="#9CA3AF"
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
@@ -655,7 +665,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
             </div>
 
             {/* Cost Line Chart */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6">
                 <h3 className="text-white text-sm font-medium">Cost</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-500">Total cost over the selected time period</p>
@@ -671,7 +681,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
+                    <YAxis width={35}
                       stroke="#9CA3AF"
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
@@ -699,7 +709,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Latency Analysis */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <h4 className="text-white text-sm font-medium mb-4">Latency Analysis</h4>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -712,7 +722,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <YAxis width={25} tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Area type="monotone" dataKey="avgLatency" stroke="#3b82f6" fillOpacity={0.8} fill="url(#colorLatency)" />
                   </AreaChart>
@@ -723,7 +733,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
             
 
             {/* Error Analysis */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6 flex items-center gap-3">
                 <AlertTriangle size={18} className="text-red-400" />
                 <div>
@@ -746,7 +756,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <YAxis width={25} tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={formatPercentage} />} />
                     <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                     <Area type="monotone" dataKey="errorRate" stroke="#ef4444" fillOpacity={0.8} fill="url(#colorErrorRate)" />
@@ -763,14 +773,14 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
           {/* Row 1: Requests and Input/Output Tokens side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Number of Requests */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Number of Requests</h3>
                 <p className="text-sm text-gray-500">Total API requests over the selected time period</p>
               </div>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={requestsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <LineChart data={requestsData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis
                       dataKey="time"
@@ -779,7 +789,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
+                    <YAxis width={35}
                       stroke="#9CA3AF"
                       tick={{fontSize: 11, fill: '#9CA3AF'}}
                       axisLine={false}
@@ -803,7 +813,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </div>
 
                     {/* Input/Output Tokens */}
-                    <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                    <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6">
                 <h3 className="text-white text-sm font-medium">Input/Output Tokens</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-500">Token consumption over the selected time period</p>
@@ -819,7 +829,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
+                    <YAxis width={35}
                       stroke="#9CA3AF"
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
@@ -854,7 +864,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
           {/* Row 2: Cost, Errors, and Error Analysis side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Cost Line Chart */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6">
                 <h3 className="text-white text-sm font-medium">Cost</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-500">Total cost over the selected time period</p>
@@ -870,7 +880,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                       axisLine={false}
                       tickLine={false}
                     />
-                    <YAxis
+                    <YAxis width={35}
                       stroke="#9CA3AF"
                       tick={{fontSize: 10, fill: '#9CA3AF'}}
                       axisLine={false}
@@ -894,7 +904,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
             </div>
 
             {/* Latency Analysis */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <h4 className="text-white text-sm font-medium mb-4">Latency Analysis</h4>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -907,7 +917,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <YAxis width={25} tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                     <Area type="monotone" dataKey="avgLatency" stroke="#3b82f6" fillOpacity={0.8} fill="url(#colorLatency)" />
                   </AreaChart>
@@ -916,7 +926,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
             </div>
 
             {/* Error Analysis */}
-            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
               <div className="mb-6 flex items-center gap-3">
                 <AlertTriangle size={18} className="text-red-400" />
                 <div>
@@ -939,7 +949,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <XAxis dataKey="time" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                    <YAxis width={25} tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                     <Tooltip content={<CustomTooltip formatter={formatPercentage} />} />
                     <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                     <Area type="monotone" dataKey="errorRate" stroke="#ef4444" fillOpacity={0.8} fill="url(#colorErrorRate2)" />
@@ -997,7 +1007,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Model Performance Radar */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-4">Model Performance</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -1047,7 +1057,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                   </div>
 
                   {/* Cost Distribution */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-4">Cost Distribution</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -1084,14 +1094,14 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Usage Patterns */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-4">Usage Patterns</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={generateUsagePatternsData()}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                           <XAxis dataKey="hour" tick={{fontSize: 10, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                          <YAxis tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
+                          <YAxis width={25} tick={{fontSize: 10, fill: "#71717a"}} axisLine={false} tickLine={false} tickFormatter={(val: number) => `${val}s`} />
                           <Tooltip content={<CustomTooltip />} cursor={{fill: 'rgba(99, 102, 241, 0.1)'}} />
                           <Bar dataKey="requests" fill="#6366f1" radius={[4, 4, 0, 0]} />
                         </BarChart>
@@ -1100,14 +1110,14 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                   </div>
 
                   {/* Model Popularity */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-4">Model Popularity</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={generateModelPopularityData()}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                           <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} axisLine={false} tickLine={false} />
-                          <YAxis tick={{fontSize: 9, fill: '#71717a'}} axisLine={false} tickLine={false} />
+                          <YAxis width={25} tick={{fontSize: 9, fill: '#71717a'}} axisLine={false} tickLine={false} />
                           <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                           <Legend iconType="circle" wrapperStyle={{fontSize: '10px'}} />
                           {getTopModelsForChart().map((model) => (
@@ -1138,7 +1148,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   
                   {/* Errors (Improved Style) */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <div className="mb-6">
                       <h3 className="text-white text-sm font-medium">Errors</h3>
                       <p className="text-xs text-gray-600 dark:text-gray-500">Failed requests over the selected time period</p>
@@ -1154,7 +1164,7 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                             axisLine={false}
                             tickLine={false}
                           />
-                          <YAxis
+                          <YAxis width={35}
                             allowDecimals={false}
                             stroke="#9CA3AF"
                             tick={{fontSize: 10, fill: '#9CA3AF'}}
@@ -1169,14 +1179,14 @@ const GatewayAnalytics2: React.FC<GatewayAnalyticsProps> = ({ gatewayId, logs })
                   </div>
 
                   {/* Provider Performance */}
-                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+                  <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                     <h4 className="text-gray-900 dark:text-white text-sm font-medium mb-4">Provider Performance</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={generateProviderPerformanceData()}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                           <XAxis dataKey="time" stroke="#9CA3AF" />
-                          <YAxis stroke="#9CA3AF" />
+                          <YAxis width={25} stroke="#9CA3AF" />
                           <Tooltip content={<CustomTooltip formatter={(val: number) => `${val}s`} />} />
                           <Legend />
                           {getProvidersForChart().map((provider) => (
