@@ -3,7 +3,7 @@
 Route requests to 200+ LLM models through one API. Full observability — track usage, costs, latency, and errors per gateway in real time.
 
 <p align="center">
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/02e50d70-c493-4698-a8da-919b513cfdaa" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/6fda0846-c9a1-49c2-aed9-e8b7ac935b9e" />
 </p>
 
 ## What it does
