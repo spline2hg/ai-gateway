@@ -73,16 +73,16 @@ OpenAI (GPT-4o, GPT-5), Anthropic (Claude 3/Opus), Google (Gemini 2.5/3), Mistra
 
 - **Backend**: FastAPI, SQLAlchemy, Python 3.12+
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
-- **Database**: SQLite (dev) / PostgreSQL (prod) — ClickHouse optional for analytics
-- **Docker**: `docker build -t ai-gateway:latest .`
+- **Database**: SQLite (dev) / PostgreSQL (prod)
+- **Docker**: `docker compose up -d` (Postgres) · `docker build -t ai-gateway:latest .`
 
 ## Deployment
 
 1. Set `ENVIRONMENT=production`
-2. Configure `DATABASE_URL` for PostgreSQL
-3. Set `CORS_ORIGINS` for your domain
-4. Add provider API keys in `.env`
-5. Optional: set up ClickHouse for analytics
+2. Start PostgreSQL: `docker compose up -d`
+3. Configure `DATABASE_URL=postgresql://aigateway:aigateway@localhost:5432/ai_gateway`
+4. Set `CORS_ORIGINS` for your domain
+5. Add provider API keys in `.env`
 
 ## License
 

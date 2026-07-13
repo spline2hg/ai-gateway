@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ai-gateway-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aigateway}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-ai_gateway}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ai_gateway_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aigateway} -d ${POSTGRES_DB:-ai_gateway}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ai_gateway_pgdata:

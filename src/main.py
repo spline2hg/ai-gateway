@@ -9,10 +9,10 @@ from starlette.responses import StreamingResponse
 # Add the src directory to the path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from db import Base, engine, get_db, Gateway, User
+from db import Base, engine, get_db, Gateway, User, SessionLocal
 from models import ChatCompletionRequest, GatewayCreate
 from utils import validate_gateway, extract_status_code_from_error, make_cache_key, analytics_cache, generate_username, get_current_user, safe_float
-from analytics import save_analytics, analytics_engine, _Session, RequestAnalytics, Analytics_Base, ANALYTICS_BACKEND
+from analytics import save_analytics, RequestAnalytics
 from model_registry import registry
 
 from contextlib import asynccontextmanager
@@ -27,25 +27,13 @@ async def lifespan(app: FastAPI):
     # Startup
     registry.initialize()
 
-    if ANALYTICS_BACKEND == "tinybird":
-        print("Analytics backend: Tinybird (ingestion via Events API)")
-    elif analytics_engine:
-        try:
-            Analytics_Base.metadata.create_all(analytics_engine)
-            print("Analytics backend: ClickHouse (connected, tables created)")
-        except Exception as e:
-            print(f"ClickHouse available but failed to create tables: {e}")
-    else:
-        print("Analytics backend: disabled (no database available)")
-
     Base.metadata.create_all(engine)
+    print("Database: tables created (analytics stored alongside core tables)")
 
     yield
 
     # Shutdown
     engine.dispose()
-    if analytics_engine:
-        analytics_engine.dispose()
     analytics_cache.clear()
 
 
@@ -340,10 +328,6 @@ async def get_gateway_analytics(
     days: int = Query(default=30, ge=1, le=365),
     advanced: bool = Query(default=False, description="Include model breakdown and daily stats")
 ):
-    global analytics_engine, _Session
-    if not analytics_engine or not _Session:
-        return {"error": "Analytics database not available"}
-
     cache_key = f"analytics:{gateway_id}:{days}:{advanced}"
 
     if cache_key in analytics_cache:
@@ -352,7 +336,7 @@ async def get_gateway_analytics(
         from datetime import datetime, timedelta, UTC
         from sqlalchemy import func, text, case
 
-        session = _Session()
+        session = SessionLocal()
         end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
@@ -429,13 +413,13 @@ async def get_gateway_analytics(
             }
 
             daily_rows = base_query.with_entities(
-                func.toDate(RequestAnalytics.timestamp).label('day'),
+                func.date(RequestAnalytics.timestamp).label('day'),
                 func.count(RequestAnalytics.id).label('requests'),
                 func.sum(RequestAnalytics.tokens_prompt).label('tokens_in'),
                 func.sum(RequestAnalytics.tokens_completion).label('tokens_out'),
                 func.sum(RequestAnalytics.cost).label('cost'),
                 func.sum(case((RequestAnalytics.status == False, 1), else_=0)).label('errors'),
-            ).group_by(func.toDate(RequestAnalytics.timestamp)).order_by(text('day')).all()
+            ).group_by(func.date(RequestAnalytics.timestamp)).order_by(text('day')).all()
 
             response["daily_stats"] = [{
                 "date": str(dr.day),
@@ -466,15 +450,11 @@ async def get_gateway_logs(
     status: Optional[str] = Query(default=None, description="success or error"),
     search: Optional[str] = Query(default=None, description="Search in model, response_id, error_message"),
 ):
-    global analytics_engine, _Session
-    if not analytics_engine or not _Session:
-        return {"error": "Analytics database not available"}
-
     try:
         from datetime import datetime, timedelta, UTC
         from sqlalchemy import func, case
 
-        session = _Session()
+        session = SessionLocal()
         end_date = datetime.now(UTC)
         start_date = end_date - timedelta(days=days)
 
@@ -491,11 +471,11 @@ async def get_gateway_logs(
         elif status == "error":
             query = query.filter(RequestAnalytics.status == False)
         if search:
-            search_pattern = f"%{search}%"
+            search_pattern_lower = f"%{search.lower()}%"
             query = query.filter(
-                (RequestAnalytics.model.ilike(search_pattern)) |
-                (RequestAnalytics.response_id.ilike(search_pattern)) |
-                (RequestAnalytics.error_message.ilike(search_pattern))
+                (func.lower(RequestAnalytics.model).like(search_pattern_lower)) |
+                (func.lower(RequestAnalytics.response_id).like(search_pattern_lower)) |
+                (func.lower(RequestAnalytics.error_message).like(search_pattern_lower))
             )
 
         total = query.count()
