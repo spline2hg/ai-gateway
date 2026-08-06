@@ -1764,5 +1764,12 @@
       "cache_read": 0,
       "cache_write": 0
     }
+  },
+  "poolside/laguna-s-2.1": {
+    "provider": "poolside",
+    "cost": {
+      "input": 0,
+      "output": 0
+    }
   }
 }

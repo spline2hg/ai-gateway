@@ -45,6 +45,11 @@ class ModelRegistry:
 
         if "/" in model_name:
             provider_id, model_id = model_name.split("/", 1)
+            # Registered namespaced model IDs are sent upstream unchanged. This
+            # lets providers such as Poolside expose IDs like
+            # "poolside/laguna-s-2.1" without provider-specific routing logic.
+            if self.model_to_provider.get(model_name) == provider_id:
+                model_id = model_name
         else:
             provider_id = self.model_to_provider.get(model_name)
             model_id = model_name
