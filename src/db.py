@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, create_engine, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.sql import func
 from sqlalchemy import DateTime
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import NullPool
 import os
 from dotenv import load_dotenv
 
@@ -45,10 +45,14 @@ if ENVIRONMENT == "production":
     engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 else:
     # Use SQLite in development
+    # NullPool: one fresh connection per session, so concurrent requests from
+    # the threadpool and event loop can never collide on a shared connection.
+    # (StaticPool previously shared ONE connection across all threads, which
+    # caused "cannot commit transaction - SQL statements in progress".)
     engine = create_engine(
         "sqlite:///./ai-gateway.db",
         connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
+        poolclass=NullPool,
     )
 
 SessionLocal = sessionmaker(bind=engine)
